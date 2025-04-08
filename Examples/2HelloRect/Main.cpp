@@ -1,11 +1,9 @@
-#include "Common/Shader.h"
-#include "Common/Window.h"
-
-#include <string_view>
 #include <vector>
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+
+#include "Common/Context.h"
+#include "Common/Shader.h"
 
 struct Vertex
 {
@@ -15,7 +13,8 @@ struct Vertex
 
 int main(int argc, char** argv)
 {
-    Cm::Window window(PROJECT_NAME, 600, 600);
+    Cm::Context context(PROJECT_NAME, 600, 600);
+    context.SetClearOptions(GL_COLOR_BUFFER_BIT);
     Cm::Shader shader({PROJECT_DIR "/VertexColored.frag", PROJECT_DIR "/VertexColored.vert"});
 
     Vertex vertices[] = {
@@ -47,17 +46,13 @@ int main(int argc, char** argv)
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    while (window.IsOpen())
+    while (context.BeginFrame())
     {
-        window.PollEvents();
-
         glUseProgram(shader.GetGpuId());
         glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, std::size(indices), GL_UNSIGNED_INT, 0);
 
-        window.SwapBuffers();
-        glClearColor(0.2f, 0.5f, 0.7f, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT);
+        context.EndFrame();
     }
     return 0;
 }

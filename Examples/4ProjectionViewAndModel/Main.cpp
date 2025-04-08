@@ -1,16 +1,9 @@
 /// Renders multiple cubes in random positions, rotations and scales
 ///
-/// Use keys A, D to rotation around the center and Space, Control to move up and down
-///
 /// What was covered through learnopengl.com:
 /// Transformations:    https://learnopengl.com/Getting-started/Transformations
 /// Coordinate-System:  https://learnopengl.com/Getting-started/Coordinate-Systems
 /// Camera (beginning): https://learnopengl.com/Getting-started/Camera
-
-#include "Common/Mesh.h"
-#include "Common/Shader.h"
-#include "Common/Texture.h"
-#include "Common/Window.h"
 
 #include <cmath>
 #include <random>
@@ -18,6 +11,13 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <imgui/imgui.h>
+
+#include "Common/Context.h"
+#include "Common/Mesh.h"
+#include "Common/Shader.h"
+#include "Common/Texture.h"
+#include "Common/Window.h"
 
 struct Transform
 {
@@ -93,13 +93,16 @@ void MoveCamera(Cm::Window& window, float moveSpeed, float deltaTime, glm::vec3&
 
 int main(int argc, char** argv)
 {
-    Cm::Window window(PROJECT_NAME);
+    Cm::Context context(PROJECT_NAME);
+    context.EnableImGui();
+
     // Enable Z-Buffer (Depth Buffer). GLFW already creates a depth buffer for you just like it does for the color buffer
     glEnable(GL_DEPTH_TEST);
+    context.SetClearOptions(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Enable Z-Buffer (Depth Buffer)
 
     constexpr glm::vec3 up(0.0f, 1.0f, 0.0f);
     constexpr glm::vec3 cameraTarget(0.0f, 0.0f, 0.0f);
-    glm::mat4 projection(glm::perspective(glm::radians(45.0f), (float)window.GetWidth() / (float)window.GetHeight(), 0.1f, 100.0f));
+    glm::mat4 projection(glm::perspective(glm::radians(45.0f), (float)context.GetWindow().GetWidth() / (float)context.GetWindow().GetHeight(), 0.1f, 100.0f));
 
     glm::vec3 cameraPosition(0.0f, 0.0f, -10.0f);
 
@@ -122,21 +125,20 @@ int main(int argc, char** argv)
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Cm::Vertex), (void*)(offsetof(Cm::Vertex, UV)));
     glBufferData(GL_ARRAY_BUFFER, Cm::Cube::VertexCount * sizeof(Cm::Vertex), Cm::Cube::Vertices, GL_STATIC_DRAW);
 
+
     std::vector cubeTransforms(RandomTransforms(10));
     constexpr float rotationSpeed = 0.5f;
-
     constexpr float cameraRadius = 10.0f;
-
-    float lastTime = 0.0f;
-    while (window.IsOpen())
+    while (context.BeginFrame())
     {
-        float time = glfwGetTime();
-        float deltaTime = time - lastTime;
-        lastTime = time;
+        if (ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove))
+        {
+            ImGui::SetWindowSize(ImVec2(200, 150));
+            ImGui::TextWrapped("Use keys A, D to rotation around the center and Space, Control to move up and down");
+            ImGui::End();
+        }
 
-        window.PollEvents();
-
-        MoveCamera(window, 1.0f, deltaTime, cameraPosition);
+        MoveCamera(context.GetWindow(), 1.0f, context.GetDeltaTime(), cameraPosition);
 
         // glm::vec3 camPos(sin(cameraPosition.x * cameraRadius), cameraPosition.y, cos(cameraPosition.x * cameraRadius));
         float camX = sin(cameraPosition.x) * cameraRadius;
@@ -157,17 +159,13 @@ int main(int argc, char** argv)
         for (Transform& transform : cubeTransforms)
         {
             // Model matrix
-            transform.RotationAngle += rotationSpeed * deltaTime;
-            // Wrap back to 0 when rotation angle exceeds 2 * PI
-            transform.RotationAngle - floor(transform.RotationAngle / 2 * CM_PI) * 2 * CM_PI;
+            transform.RotationAngle += rotationSpeed * context.GetDeltaTime();
             glm::mat4 model(transform.GetModel());
             glUniformMatrix4fv(glGetUniformLocation(shader.GetGpuId(), "u_Model"), 1, GL_FALSE, &model[0][0]);
             glDrawArrays(GL_TRIANGLES, 0, Cm::Cube::VertexCount);
         }
 
-        window.SwapBuffers();
-        glClearColor(0.2f, 0.5f, 0.7f, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Enable Z-Buffer (Depth Buffer)
+        context.EndFrame();
     }
     return 0;
 }

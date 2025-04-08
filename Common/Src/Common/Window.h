@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string_view>
+
 // Forward declare
 struct GLFWwindow;
 struct GLFWmonitor;

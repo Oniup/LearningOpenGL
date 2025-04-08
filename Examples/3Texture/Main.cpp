@@ -1,14 +1,13 @@
-#include "Common/Shader.h"
-#include "Common/Window.h"
-
 #define STB_IMAGE_IMPLEMENTATION
 #include <iostream>
 #include <string_view>
 #include <vector>
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <stb/stb_image.h>
+
+#include "Common/Context.h"
+#include "Common/Shader.h"
 
 struct Vertex
 {
@@ -62,7 +61,8 @@ unsigned int LoadTexture(const std::string_view& path, bool linearFiltering)
 
 int main(int argc, char** argv)
 {
-    Cm::Window window(PROJECT_NAME, 600, 600);
+    Cm::Context context(PROJECT_NAME, 600, 600);
+    context.SetClearOptions(GL_COLOR_BUFFER_BIT);
     Cm::Shader shader({PROJECT_DIR "/TextureShader.frag", PROJECT_DIR "/TextureShader.vert"});
 
     unsigned int backgroundTexture = LoadTexture((RESOURCE_DIR "/Prototype/texture_07.png"), false);
@@ -100,10 +100,8 @@ int main(int argc, char** argv)
     // Swap between mixing the two textures or if the smile face alpha isn't 0, then override base texture
     bool useMix = true;
 
-    while (window.IsOpen())
+    while (context.BeginFrame())
     {
-        window.PollEvents();
-
         glUseProgram(shader.GetGpuId());
         glUniform1i(glGetUniformLocation(shader.GetGpuId(), "u_UseMix"), useMix);
 
@@ -120,9 +118,7 @@ int main(int argc, char** argv)
         glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, std::size(indices), GL_UNSIGNED_INT, 0);
 
-        window.SwapBuffers();
-        glClearColor(0.2f, 0.5f, 0.7f, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT);
+        context.EndFrame();
     }
 
     glDeleteTextures(1, &backgroundTexture);
