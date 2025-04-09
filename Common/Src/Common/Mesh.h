@@ -1,5 +1,6 @@
 #pragma once
 
+#include <random>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -13,24 +14,10 @@ namespace Cm
         glm::vec3 Scale;
         glm::vec3 Rotation;
 
-        glm::mat4 GetModel() const
-        {
-            glm::vec3 eulerAngles = glm::radians(Rotation);
-            // Create quaternions from euler angles
-            glm::quat quatX = glm::angleAxis(eulerAngles.x, glm::vec3(1.0f, 0.0f, 0.0f));
-            glm::quat quatY = glm::angleAxis(eulerAngles.y, glm::vec3(0.0f, 1.0f, 0.0f));
-            glm::quat quatZ = glm::angleAxis(eulerAngles.z, glm::vec3(0.0f, 0.0f, 1.0f));
+        static std::vector<Cm::Transform> GenerateMultiRandom(size_t count, float minPos = -4.0f, float maxPos = 4.0f);
 
-            // Combine the quaternions and the order of operations matters
-            glm::quat rotation = quatZ * quatY * quatX;
-
-            // Construct transform
-            glm::mat4 model(1.0f);
-            model = glm::translate(model, Position);
-            model *= glm::mat4_cast(rotation);
-            model = glm::scale(model, Scale);
-            return model;
-        }
+        glm::mat4 GetModel() const;
+        void GenerateRandom(float minPos = -4.0f, float maxPos = 4.0f);
     };
 
     struct Vertex

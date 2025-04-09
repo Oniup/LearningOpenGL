@@ -3,6 +3,7 @@
 option(GLM_BUILD_INSTALL OFF)
 option(GLM_ENABLE_CXX_20 OFF)
 add_subdirectory(glm)
+set_target_properties(glm PROPERTIES FOLDER "Common Dependencies")
 
 # GLFW
 option(GLFW_BUILD_EXAMPLES OFF)
@@ -10,6 +11,7 @@ option(GLFW_BUILD_TESTS OFF)
 option(GLFW_BUILD_DOCS OFF)
 option(GLFW_INSTALL OFF)
 add_subdirectory(glfw)
+set_target_properties(glfw PROPERTIES FOLDER "Common Dependencies")
 
 # GLAD
 add_library(glad STATIC
@@ -21,6 +23,7 @@ target_include_directories(glad
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/glad/include/
 )
+set_target_properties(glad PROPERTIES FOLDER "Common Dependencies")
 
 # STB
 add_library(stb INTERFACE
@@ -34,6 +37,7 @@ target_include_directories(stb
     INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/stb
 )
+set_target_properties(stb PROPERTIES FOLDER "Common Dependencies")
 
 # ImGui
 add_library(ImGui STATIC
@@ -74,4 +78,5 @@ if (WIN32 AND MSVC)
         "_CRT_SECURE_NO_WARNINGS"
     )
 endif()
+set_target_properties(ImGui PROPERTIES FOLDER "Common Dependencies")
 

@@ -69,8 +69,12 @@ function(Add exec_name)
     endif()
 endfunction()
 
+# Basics
 Add(1HelloTriangle)
 Add(2HelloRect)
 Add(3Texture)
 Add(4ProjectionViewAndModel)
 Add(5FpsCameraControls)
+
+# Lighting
+Add(6BasicPhongLighting)

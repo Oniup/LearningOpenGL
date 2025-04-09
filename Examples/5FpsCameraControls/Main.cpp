@@ -1,6 +1,3 @@
-/// What was covered through learnopengl.com:
-/// Camera (beginning): https://learnopengl.com/Getting-started/Camera
-
 #include <cmath>
 #include <random>
 #include <glad/glad.h>
@@ -85,9 +82,9 @@ void MoveCamera(Cm::Window& window, float deltaTime, Camera& camera)
         moveDirection += glm::cross(camera.Forward, camera.Up);
     if (glfwGetKey(window.GetInternalWindow(), GLFW_KEY_D) == GLFW_PRESS)
         moveDirection += -glm::cross(camera.Forward, camera.Up);
-    if (glfwGetKey(window.GetInternalWindow(), GLFW_KEY_SPACE) == GLFW_PRESS)
+    if (glfwGetKey(window.GetInternalWindow(), GLFW_KEY_E) == GLFW_PRESS)
         moveDirection += camera.Up;
-    if (glfwGetKey(window.GetInternalWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    if (glfwGetKey(window.GetInternalWindow(), GLFW_KEY_Q) == GLFW_PRESS)
         moveDirection += -camera.Up;
     if (glfwGetKey(window.GetInternalWindow(), GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
         moveSpeed *= 2;
@@ -97,7 +94,6 @@ void MoveCamera(Cm::Window& window, float deltaTime, Camera& camera)
 }
 
 Camera Cam;
-
 void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 
 int main(int argc, char** argv)

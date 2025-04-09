@@ -1,10 +1,3 @@
-/// Renders multiple cubes in random positions, rotations and scales
-///
-/// What was covered through learnopengl.com:
-/// Transformations:    https://learnopengl.com/Getting-started/Transformations
-/// Coordinate-System:  https://learnopengl.com/Getting-started/Coordinate-Systems
-/// Camera (beginning): https://learnopengl.com/Getting-started/Camera
-
 #include <cmath>
 #include <random>
 #include <glad/glad.h>
