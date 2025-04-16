@@ -60,7 +60,7 @@ namespace Cm
         std::uniform_real_distribution rRot(0.0f, 360.0f);
         std::uniform_real_distribution rSca(0.1f, 1.0f);
         Position = glm::vec3(rPos(eng), rPos(eng), rPos(eng));
-        Scale = glm::vec3(rSca(eng));
         Rotation = glm::vec3(rRot(eng), rRot(eng), rRot(eng));
+        Scale = glm::vec3(rSca(eng));
     }
 }

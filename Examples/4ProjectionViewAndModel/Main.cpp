@@ -15,16 +15,16 @@
 struct Transform
 {
     glm::vec3 Position = glm::vec3(0.0f);
-    glm::vec3 Scale = glm::vec3(1.0f);
     glm::vec3 Rotation = glm::vec3(0.0f, 0.0f, 1.0f);
+    glm::vec3 Scale = glm::vec3(1.0f);
     float RotationAngle = 0.0f;
 
     glm::mat4 GetModel() const
     {
         glm::mat4 model(1.0f);
         model = glm::translate(model, Position);
-        model = glm::scale(model, Scale);
         model = glm::rotate(model, RotationAngle, Rotation);
+        model = glm::scale(model, Scale);
         return model;
     }
 };

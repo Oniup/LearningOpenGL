@@ -1,3 +1,4 @@
+#include <iostream>
 #include <random>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -6,26 +7,30 @@
 #include <imgui/imgui.h>
 
 #include "Common/Camera.h"
+#include "Common/Color.h"
 #include "Common/Context.h"
 #include "Common/Mesh.h"
 #include "Common/Shader.h"
 #include "Common/Texture.h"
 #include "Common/Window.h"
 
-float MouseXOffset;
-float MouseYOffset;
-void MouseCallback(GLFWwindow* window, double xPos, double yPos);
+struct Light
+{
+    glm::vec3 Position;
+    glm::vec3 Color;
+};
 
 int main(int argc, char** argv)
 {
     Cm::Context context(PROJECT_NAME);
-    glfwSetCursorPosCallback(context.GetWindow().GetInternalWindow(), MouseCallback);
+    glfwSetCursorPosCallback(context.GetWindow().GetInternalWindow(), Cm::FirstPersonCamera::MouseCallback);
     glfwSetInputMode(context.GetWindow().GetInternalWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glEnable(GL_DEPTH_TEST);
     context.SetClearOptions(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     Cm::FirstPersonCamera camera;
+    camera.Position = glm::vec3(0.0f, 0.0f, -10.0f);
     glm::mat4 projection(glm::perspective(glm::radians(45.0f), (float)context.GetWindow().GetWidth() / (float)context.GetWindow().GetHeight(), 0.1f, 100.0f));
 
     // Create opengl resources
@@ -51,9 +56,8 @@ int main(int argc, char** argv)
     while (context.BeginFrame())
     {
         camera.ProcessMovement(context.GetWindow(), context.GetDeltaTime());
-        camera.ProcessMouseMovement(MouseXOffset, MouseYOffset);
+        camera.ProcessMouseMovement();
 
-        // glm::vec3 camPos(sin(cameraPosition.x * cameraRadius), cameraPosition.y, cos(cameraPosition.x * cameraRadius));
         glUseProgram(shader.GetGpuId());
         // Project and View matrix
         glUniformMatrix4fv(glGetUniformLocation(shader.GetGpuId(), "u_Projection"), 1, GL_FALSE, &projection[0][0]);
@@ -74,27 +78,6 @@ int main(int argc, char** argv)
         }
 
         context.EndFrame();
-        MouseXOffset = 0.0f;
-        MouseYOffset = 0.0f;
     }
     return 0;
-}
-
-void MouseCallback(GLFWwindow* window, double xPos, double yPos)
-{
-    static bool firstMouse = true;
-    static float lastX = 0.0f;
-    static float lastY = 0.0f;
-    if (firstMouse)
-    {
-        lastX = xPos;
-        lastY = yPos;
-        firstMouse = false;
-        return;
-    }
-
-    MouseXOffset = xPos - lastX;
-    MouseYOffset = lastY - yPos;
-    lastX = xPos;
-    lastY = yPos;
 }

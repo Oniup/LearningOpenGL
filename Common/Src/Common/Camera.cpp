@@ -2,6 +2,9 @@
 
 namespace Cm
 {
+    float FirstPersonCamera::MouseXOffset = 0.0f;
+    float FirstPersonCamera::MouseYOffset = 0.0f;
+
     glm::mat4 Camera::GetViewModel()
     {
         return glm::lookAt(Position, Position - Forward, Up);
@@ -31,13 +34,13 @@ namespace Cm
             Position += glm::normalize(moveDirection) * moveSpeed * deltaTime;
     }
 
-    void FirstPersonCamera::ProcessMouseMovement(float xOffset, float yOffset, bool constrainPitch)
+    void FirstPersonCamera::ProcessMouseMovement(bool constrainPitch)
     {
-        xOffset *= MouseSensitivity;
-        yOffset *= MouseSensitivity;
+        MouseXOffset *= MouseSensitivity;
+        MouseYOffset *= MouseSensitivity;
 
-        Yaw   += xOffset;
-        Pitch -= yOffset;
+        Yaw   += MouseXOffset;
+        Pitch -= MouseYOffset;
 
         if (constrainPitch)
         {
@@ -54,5 +57,27 @@ namespace Cm
         direction.y = sin(pitch);
         direction.z = sin(yaw) * cos(pitch);
         Forward = glm::normalize(direction);
+
+        MouseXOffset = 0.0f;
+        MouseYOffset = 0.0f;
+    }
+
+    void FirstPersonCamera::MouseCallback(GLFWwindow* window, double xPos, double yPos)
+    {
+        static bool firstMouse = true;
+        static float lastX = 0.0f;
+        static float lastY = 0.0f;
+        if (firstMouse)
+        {
+            lastX = xPos;
+            lastY = yPos;
+            firstMouse = false;
+            return;
+        }
+
+        MouseXOffset = xPos - lastX;
+        MouseYOffset = lastY - yPos;
+        lastX = xPos;
+        lastY = yPos;
     }
 }

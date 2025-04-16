@@ -18,12 +18,17 @@ namespace Cm
 
     struct FirstPersonCamera : Camera
     {
+        static float MouseXOffset;
+        static float MouseYOffset;
+
         float Yaw = -90.0f;
         float Pitch = 0.0f;
         float MoveSpeed = 5.0f;
         float MouseSensitivity = 0.1f;
 
         void ProcessMovement(Window& window, float deltaTime);
-        void ProcessMouseMovement(float xOffset, float yOffset, bool constrainPitch = true);
+        void ProcessMouseMovement(bool constrainPitch = true);
+
+        static void MouseCallback(GLFWwindow* window, double xPos, double yPos);
     };
 }
