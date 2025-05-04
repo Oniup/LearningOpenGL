@@ -94,10 +94,6 @@ namespace Cm
         ImVec4* colors = style.Colors;
 
         // General window settings
-        style.FrameRounding = 5.0f;
-        style.ScrollbarRounding = 5.0f;
-        style.GrabRounding = 5.0f;
-        style.TabRounding = 5.0f;
         style.WindowMenuButtonPosition = ImGuiDir_None;
 
         // Setting the colors

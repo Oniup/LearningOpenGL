@@ -1,16 +1,26 @@
 #include "Common/Camera.h"
 
+#include <imgui/backends/imgui_impl_glfw.h>
+
 namespace Cm
 {
     float FirstPersonCamera::MouseXOffset = 0.0f;
     float FirstPersonCamera::MouseYOffset = 0.0f;
+    bool FirstPersonCamera::ImGuiEnabled = false;
 
-    glm::mat4 Camera::GetViewModel()
+    glm::mat4 Camera::GetViewMatrix()
     {
         return glm::lookAt(Position, Position - Forward, Up);
     }
 
-    void FirstPersonCamera::ProcessMovement(Window& window, float deltaTime)
+    FirstPersonCamera::FirstPersonCamera(const Context& context)
+    {
+        glfwSetCursorPosCallback(context.GetWindow().GetInternalWindow(), Cm::FirstPersonCamera::MouseCallback);
+        glfwSetInputMode(context.GetWindow().GetInternalWindow(), GLFW_CURSOR, CanRotate ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+        ImGuiEnabled = context.IsImGuiEnabled();
+    }
+
+    void FirstPersonCamera::ProcessMovement(const Window& window, float deltaTime)
     {
         glm::vec3 moveDirection(0.0f);
         float moveSpeed = MoveSpeed;
@@ -32,38 +42,51 @@ namespace Cm
 
         if (glm::dot(moveDirection, moveDirection) != 0)
             Position += glm::normalize(moveDirection) * moveSpeed * deltaTime;
+
+        static bool last = true;
+        bool switchCanRotate = glfwGetMouseButton(window.GetInternalWindow(), GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
+        if (last != switchCanRotate)
+        {
+            CanRotate = !CanRotate;
+            glfwSetInputMode(window.GetInternalWindow(), GLFW_CURSOR, CanRotate ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+        }
+        last = switchCanRotate;
     }
 
     void FirstPersonCamera::ProcessMouseMovement(bool constrainPitch)
     {
-        MouseXOffset *= MouseSensitivity;
-        MouseYOffset *= MouseSensitivity;
-
-        Yaw   += MouseXOffset;
-        Pitch -= MouseYOffset;
-
-        if (constrainPitch)
+        if (CanRotate)
         {
-            if (Pitch > 89.0f)
-                Pitch = 89.0f;
-            if (Pitch < -89.0f)
-                Pitch = -89.0f;
+            MouseXOffset *= MouseSensitivity;
+            MouseYOffset *= MouseSensitivity;
+            Yaw   += MouseXOffset;
+            Pitch -= MouseYOffset;
+
+            if (constrainPitch)
+            {
+                if (Pitch > 89.0f)
+                    Pitch = 89.0f;
+                if (Pitch < -89.0f)
+                    Pitch = -89.0f;
+            }
+
+            glm::vec3 direction;
+            float yaw = glm::radians(Yaw);
+            float pitch = glm::radians(Pitch);
+            direction.x = cos(yaw) * cos(pitch);
+            direction.y = sin(pitch);
+            direction.z = sin(yaw) * cos(pitch);
+            Forward = glm::normalize(direction);
         }
-
-        glm::vec3 direction;
-        float yaw = glm::radians(Yaw);
-        float pitch = glm::radians(Pitch);
-        direction.x = cos(yaw) * cos(pitch);
-        direction.y = sin(pitch);
-        direction.z = sin(yaw) * cos(pitch);
-        Forward = glm::normalize(direction);
-
         MouseXOffset = 0.0f;
         MouseYOffset = 0.0f;
     }
 
     void FirstPersonCamera::MouseCallback(GLFWwindow* window, double xPos, double yPos)
     {
+        if (ImGuiEnabled)
+            ImGui_ImplGlfw_CursorPosCallback(window, xPos, yPos);
+
         static bool firstMouse = true;
         static float lastX = 0.0f;
         static float lastY = 0.0f;

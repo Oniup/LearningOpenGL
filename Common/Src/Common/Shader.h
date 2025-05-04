@@ -4,6 +4,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <glm/glm.hpp>
 
 namespace Cm
 {
@@ -33,6 +34,22 @@ namespace Cm
         {
             return m_GpuId;
         }
+
+        void Bind();
+
+        void UniformI(const std::string_view& location, int val);
+        void UniformI2(const std::string_view& location, const glm::ivec2& vec);
+        void UniformI3(const std::string_view& location, const glm::ivec3& vec);
+        void UniformI4(const std::string_view& location, const glm::ivec4& vec);
+
+        void UniformF(const std::string_view& location, float val);
+        void UniformF2(const std::string_view& location, const glm::vec2& vec);
+        void UniformF3(const std::string_view& location, const glm::vec3& vec);
+        void UniformF4(const std::string_view& location, const glm::vec4& vec);
+
+        void UniformMat2(const std::string_view& location, glm::mat2 mat);
+        void UniformMat3(const std::string_view& location, glm::mat3 mat);
+        void UniformMat4(const std::string_view& location, glm::mat4 mat);
 
     private:
         std::pair<ShaderStage, std::string> ReadSource(const std::string_view& path);

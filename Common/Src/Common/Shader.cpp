@@ -27,7 +27,7 @@ namespace Cm
                 char infoLog[infoLogLength];
                 glGetShaderInfoLog(shader, infoLogLength, nullptr, infoLog);
                 std::cerr << "Failed to compile shader at \"" << paths[i] << "\":\n" << infoLog << "\n";
-                std::exit(-1);
+                std::abort();
             }
             shaders.push_back(shader);
         }
@@ -44,7 +44,7 @@ namespace Cm
             char infoLog[infoLogLength];
             glGetProgramInfoLog(program, infoLogLength, nullptr, infoLog);
             std::cerr << "Failed to link shader program's shaders: " << infoLog << "\n";
-            std::exit(-1);
+            std::abort();
         }
 
         for (unsigned int shader : shaders)
@@ -61,13 +61,73 @@ namespace Cm
         }
     }
 
+    void Shader::Bind()
+    {
+        glUseProgram(m_GpuId);
+    }
+
+    void Shader::UniformI(const std::string_view& location, int val)
+    {
+        glUniform1i(glGetUniformLocation(m_GpuId, location.data()), val);
+    }
+
+    void Shader::UniformI2(const std::string_view& location, const glm::ivec2& vec)
+    {
+        glUniform2iv(glGetUniformLocation(m_GpuId, location.data()), 1, &vec[0]);
+    }
+
+    void Shader::UniformI3(const std::string_view& location, const glm::ivec3& vec)
+    {
+        glUniform3iv(glGetUniformLocation(m_GpuId, location.data()), 1, &vec[0]);
+    }
+
+    void Shader::UniformI4(const std::string_view& location, const glm::ivec4& vec)
+    {
+        glUniform4iv(glGetUniformLocation(m_GpuId, location.data()), 1, &vec[0]);
+    }
+
+    void Shader::UniformF(const std::string_view& location, float val)
+    {
+        glUniform1f(glGetUniformLocation(m_GpuId, location.data()), val);
+    }
+
+    void Shader::UniformF2(const std::string_view& location, const glm::vec2& vec)
+    {
+        glUniform2fv(glGetUniformLocation(m_GpuId, location.data()), 1, &vec[0]);
+    }
+
+    void Shader::UniformF3(const std::string_view& location, const glm::vec3& vec)
+    {
+        glUniform3fv(glGetUniformLocation(m_GpuId, location.data()), 1, &vec[0]);
+    }
+
+    void Shader::UniformF4(const std::string_view& location, const glm::vec4& vec)
+    {
+        glUniform4fv(glGetUniformLocation(m_GpuId, location.data()), 1, &vec[0]);
+    }
+
+    void Shader::UniformMat2(const std::string_view& location, glm::mat2 mat)
+    {
+        glUniformMatrix2fv(glGetUniformLocation(m_GpuId, location.data()), 1, GL_FALSE, &mat[0][0]);
+    }
+
+    void Shader::UniformMat3(const std::string_view& location, glm::mat3 mat)
+    {
+        glUniformMatrix3fv(glGetUniformLocation(m_GpuId, location.data()), 1, GL_FALSE, &mat[0][0]);
+    }
+
+    void Shader::UniformMat4(const std::string_view& location, glm::mat4 mat)
+    {
+        glUniformMatrix4fv(glGetUniformLocation(m_GpuId, location.data()), 1, GL_FALSE, &mat[0][0]);
+    }
+
     std::pair<ShaderStage, std::string> Shader::ReadSource(const std::string_view& path)
     {
         std::FILE* file = std::fopen(path.data(), "rb");
         if (!file)
         {
             std::cerr << "Shader source file path doesn't exit \"" << path << "\"\n";
-            std::exit(-1);
+            std::abort();
         }
         std::fseek(file, 0, SEEK_END);
         int length = std::ftell(file);
@@ -83,7 +143,7 @@ namespace Cm
         if (extOffset == std::string::npos)
         {
             std::cerr << "Shader file must have a file extension \"" << path << "\"\n";
-            std::exit(-1);
+            std::abort();
         }
         std::string_view ext = path.substr(extOffset);
         for (size_t i = 0; i < ShaderFileExtensions.size(); ++i)
@@ -97,7 +157,7 @@ namespace Cm
         if (stage == ShaderStage::Invalid)
         {
             std::cerr << "Invalid shader path extension \"" << path << "\"\n";
-            std::exit(-1);
+            std::abort();
         }
         return std::pair{stage, std::move(source)};
     }
@@ -115,7 +175,7 @@ namespace Cm
         case ShaderStage::Compute:
             return GL_COMPUTE_SHADER;
         default:
-            std::exit(-1);
+            std::abort();
         }
     }
 }

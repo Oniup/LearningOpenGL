@@ -37,7 +37,7 @@ namespace Cm
             return m_Window;
         }
 
-        const GLFWwindow* GetInternalWindow() const
+        GLFWwindow* GetInternalWindow() const
         {
             return m_Window;
         }

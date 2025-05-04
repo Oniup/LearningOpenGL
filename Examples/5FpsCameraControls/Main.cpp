@@ -144,6 +144,12 @@ int main(int argc, char** argv)
             ImGui::SetWindowSize(ImVec2(200, 150));
             ImGui::TextWrapped("Use keys A, D to rotation around the center and Space, Control to move up and down");
             ImGui::TextWrapped("CameraPosition: %f, %f, %f", Cam.Position.x, Cam.Position.y, Cam.Position.z);
+            ImGui::Spacing();
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(238.0f / 255.0f, 210 / 255.0f, 2 / 255.0f, 1.0f));
+            ImGui::TextWrapped("Warning: ");
+            ImGui::PopStyleColor();
+            ImGui::SameLine();
+            ImGui::TextWrapped("Use alt+F4 to exit");
             ImGui::End();
         }
 

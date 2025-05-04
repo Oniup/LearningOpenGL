@@ -1,0 +1,97 @@
+#include "Common/VertexBuffer.h"
+
+#include <glad/glad.h>
+
+namespace Cm
+{
+    VertexBuffer::VertexBuffer(Type type)
+        : m_Type(type), m_Elements(UINT32_MAX), m_DataCount(0)
+    {
+        glGenVertexArrays(1, &m_Arrays);
+        glGenBuffers(1, &m_Vertices);
+        glBindVertexArray(m_Arrays);
+        glBindBuffer(GL_ARRAY_BUFFER, m_Vertices);
+
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, Position)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, Normal)));
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, UV)));
+
+        glBindVertexArray(0);
+    }
+
+    VertexBuffer::~VertexBuffer()
+    {
+        if (m_Arrays != UINT32_MAX)
+        {
+            glDeleteVertexArrays(1, &m_Arrays);
+            glDeleteBuffers(1, &m_Vertices);
+            if (m_Elements != UINT32_MAX)
+            {
+                glDeleteBuffers(1, &m_Elements);
+            }
+            m_Arrays = UINT32_MAX;
+            m_Vertices = UINT32_MAX;
+            m_Elements = UINT32_MAX;
+            m_DataCount = 0;
+        }
+    }
+
+    void VertexBuffer::Bind()
+    {
+        glBindVertexArray(m_Arrays);
+    }
+
+    void VertexBuffer::Unbind()
+    {
+        glBindVertexArray(0);
+    }
+
+    void VertexBuffer::PushData(size_t vertexCount, const Vertex* vertices)
+    {
+        glBindVertexArray(m_Arrays);
+        glBindBuffer(GL_ARRAY_BUFFER, m_Vertices);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexCount, vertices, m_Type == Static ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+        if (m_Elements == UINT32_MAX)
+            m_DataCount = vertexCount;
+    }
+
+    void VertexBuffer::PushData(size_t elementCount, const unsigned int* elements)
+    {
+        glBindVertexArray(m_Arrays);
+        if (m_Elements != UINT32_MAX)
+            glGenBuffers(1, &m_Elements);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Elements);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * elementCount, elements, m_Type == Static ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+        m_DataCount = elementCount;
+    }
+
+    void VertexBuffer::PushData(size_t offset, size_t vertexCount, const Vertex* vertices)
+    {
+        glBindVertexArray(m_Arrays);
+        if (m_Vertices != UINT32_MAX)
+            PushData(offset + vertexCount, (Vertex*)nullptr);
+        glBindBuffer(GL_ARRAY_BUFFER, m_Vertices);
+        glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vertex) * offset, sizeof(Vertex) * vertexCount, vertices);
+    }
+
+    void VertexBuffer::PushData(size_t offset, size_t elementCount, const unsigned int* elements)
+    {
+        glBindVertexArray(m_Arrays);
+        if (m_Elements != UINT32_MAX)
+            PushData(offset + elementCount, (unsigned int*)nullptr);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Elements);
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * offset, sizeof(unsigned int) * elementCount, elements);
+    }
+
+    void VertexBuffer::Draw(DrawMode mode)
+    {
+        glBindVertexArray(m_Arrays);
+        if (m_Elements != UINT32_MAX)
+            glDrawElements((GLenum)mode, m_DataCount, GL_UNSIGNED_INT, (void*)0);
+        else
+            glDrawArrays((GLenum)mode, 0, m_DataCount);
+    }
+}

@@ -10,9 +10,9 @@ namespace Cm
 {
     struct Transform
     {
-        glm::vec3 Position;
-        glm::vec3 Rotation;
-        glm::vec3 Scale;
+        glm::vec3 Position = glm::vec3(0.0f);
+        glm::vec3 Rotation = glm::vec3(0.0f);
+        glm::vec3 Scale = glm::vec3(1.0f);
 
         static std::vector<Cm::Transform> GenerateMultiRandom(size_t count, float minPos = -4.0f, float maxPos = 4.0f);
 

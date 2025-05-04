@@ -22,6 +22,11 @@ namespace Cm
             return m_Window;
         }
 
+        const Window& GetWindow() const
+        {
+            return m_Window;
+        }
+
         glm::vec4& GetClearColor()
         {
             return  m_ClearColor;
@@ -35,6 +40,11 @@ namespace Cm
         float GetDeltaTime()
         {
             return m_DeltaTime;
+        }
+
+        bool IsImGuiEnabled() const
+        {
+            return m_ImGuiEnabled;
         }
 
         void EnableImGui();
