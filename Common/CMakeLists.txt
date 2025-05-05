@@ -15,6 +15,7 @@ target_include_directories(Common PUBLIC
     ${glm_INCLUDE_DIRS}
     ${ImGui_INCLUDE_DIRS}
     ${stb_INCLUDE_DIRS}
+    ${assimp_INCLUDE_DIRS}
 )
 target_link_libraries(Common PUBLIC
     glm
@@ -22,6 +23,7 @@ target_link_libraries(Common PUBLIC
     glfw
     ImGui
     stb
+    assimp::assimp
 )
 target_compile_definitions(Common PUBLIC
     ${required_preprocessor_definitions}

@@ -76,5 +76,6 @@ Add(3Texture)
 Add(4ProjectionViewAndModel)
 Add(5FpsCameraControls)
 
-# Lighting
+# Phong Lighting
 Add(6BasicPhongLighting)
+Add(7PhongMaterials)

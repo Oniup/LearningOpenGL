@@ -1,5 +1,6 @@
 # Graphics Libraries
 # ---------------------------------------------------------------------------------------------------------------------
+# OpenGL Maths Library
 option(GLM_BUILD_INSTALL OFF)
 option(GLM_ENABLE_CXX_20 OFF)
 add_subdirectory(glm)
@@ -38,6 +39,9 @@ target_include_directories(stb
     ${CMAKE_CURRENT_SOURCE_DIR}/stb
 )
 set_target_properties(stb PROPERTIES FOLDER "Common Dependencies")
+
+# Utility Libraries
+# ---------------------------------------------------------------------------------------------------------------------
 
 # ImGui
 add_library(ImGui STATIC
@@ -80,3 +84,6 @@ if (WIN32 AND MSVC)
 endif()
 set_target_properties(ImGui PROPERTIES FOLDER "Common Dependencies")
 
+# Assimp
+option(ASSIMP_BUILD_TESTS OFF)
+add_subdirectory(Assimp)

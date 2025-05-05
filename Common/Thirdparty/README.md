@@ -4,15 +4,16 @@
 > and matching their respective folder name. Keep each entry in the same style
 > as the rest for better readability and consistency
 
-## flecs
 
-* Upstream: https://github.com/SanderMertens/flecs
-* Version: v4.0.5
+## Assimp
+
+* Upstream:
+* Version: v5.4.3
 * License: MIT
 
-##### Files Extracted
+#### Files Extracted:
 
-* distr (Renamed to flecs)
+**
 
 ## glad
 
