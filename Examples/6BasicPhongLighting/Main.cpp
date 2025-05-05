@@ -21,7 +21,31 @@ struct Light
 {
     Cm::Transform Transform;
     glm::vec3 Color = glm::vec3(1.0f);
+
+    float Intencity;
+    float Linear;
+    float Quadratic;
 };
+
+void CalcLightIntencity(Light& light)
+{
+    const float a = 0.640f;
+    const float b = 0.130f;
+    const float c = 83.300f;
+    light.Linear = a / (light.Intencity * b);
+    light.Quadratic = c / (light.Intencity * light.Intencity);
+}
+
+void AddLight(std::vector<Light>& lights)
+{
+    Light light;
+    light.Transform.Position = glm::vec3(0.0f);
+    light.Transform.Rotation = glm::vec3(0.0f);
+    light.Transform.Scale = glm::vec3(0.1f);
+    light.Intencity = 50.0f;
+    CalcLightIntencity(light);
+    lights.push_back(std::move(light));
+}
 
 int main(int argc, char** argv)
 {
@@ -47,7 +71,7 @@ int main(int argc, char** argv)
 
     Cm::Shader lightShader({ PROJECT_DIR "/Default.vert", PROJECT_DIR "/Light.frag" });
     std::vector<Light> lights;
-    lights.push_back(Light{ Cm::Transform{glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.1f)} });
+    AddLight(lights);
 
     // Setting the index of the 'Matrices' uniform block struct in the shader so that all shaders can share the same data.
     glUniformBlockBinding(cubeShader.GetGpuId(), glGetUniformBlockIndex(cubeShader.GetGpuId(), "Matrices"), 0);
@@ -81,13 +105,16 @@ int main(int argc, char** argv)
                     {
                         ImGui::DragFloat3("Position", &lights[i].Transform.Position[0], 0.05f);
                         ImGui::ColorEdit3("Color", &lights[i].Color[0]);
+                        ImGui::DragFloat("Intencity", &lights[i].Intencity, 1.0f, 0.1f);
+                        CalcLightIntencity(lights[i]);
+                        ImGui::Text("Linear: %f, Quadratic: %f", lights[i].Linear, lights[i].Quadratic);
                     }
                     ImGui::PopID();
                 }
                 if (lights.size() < MaxLightCount)
                 {
                     if (ImGui::Button("Add"))
-                        lights.push_back(Light{ Cm::Transform{glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.1f)}});
+                        AddLight(lights);
                 }
                 ImGui::TreePop();
             }
@@ -121,6 +148,10 @@ int main(int argc, char** argv)
             cubeShader.UniformF3(name, lights[i].Transform.Position);
             snprintf(name, NameSize, "u_Lights[%zu].Color", i);
             cubeShader.UniformF3(name, lights[i].Color);
+            snprintf(name, NameSize, "u_Lights[%zu].Linear", i);
+            cubeShader.UniformF(name, lights[i].Linear);
+            snprintf(name, NameSize, "u_Lights[%zu].Quadratic", i);
+            cubeShader.UniformF(name, lights[i].Quadratic);
         }
 
         for (const Cm::Transform& transform : cubeTransforms)

@@ -6,6 +6,8 @@ struct Light
 {
     vec3 Position;
     vec3 Color;
+    float Linear;
+    float Quadratic;
 };
 
 uniform int u_LightCount;
@@ -39,6 +41,13 @@ vec3 SpecularLighting(vec3 lightDirecftion, vec3 lightColor)
     return specularStrength * spec * lightColor;
 }
 
+float CalcAttenuation(Light light)
+{
+    float dist = length(light.Position - Vertex.Position);
+    float atten = 1.0 / (1.0 + light.Linear * dist + light.Quadratic * (dist * dist));;
+    return atten;
+}
+
 void main()
 {
     vec4 diffuseColor = texture(u_Diffuse, Vertex.UV);
@@ -49,11 +58,17 @@ void main()
         vec3 lightDirection = normalize(u_Lights[i].Position - Vertex.Position);
         vec3 lightColor = u_Lights[i].Color;
 
+        float attenuation = CalcAttenuation(u_Lights[i]);
+
+        vec3 ambientLighting = u_AmbientLight;
         vec3 diffuseLighting = DiffuseLighting(lightDirection, lightColor);
         vec3 specularLighting = SpecularLighting(lightDirection, lightColor);
 
-        lightsColor += diffuseLighting + specularLighting;
+        ambientLighting *= attenuation;
+        diffuseLighting *= attenuation;
+        specularLighting *= attenuation;
+        lightsColor += ambientLighting + diffuseLighting + specularLighting;
     }
 
-    FragColor = vec4(u_AmbientLight + lightsColor, 1.0) * diffuseColor;
+    FragColor = vec4(lightsColor, 1.0) * diffuseColor;
 }
