@@ -16,6 +16,8 @@ CMakeCache.txt
 *.ninja
 .ninja/
 run_ninja_env.bat
+.ninja_deps
+.ninja_log
 
 # C/C++ generated
 *.a
