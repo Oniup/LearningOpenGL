@@ -805,9 +805,9 @@ IF ( ASSIMP_BUILD_SAMPLES )
   ADD_SUBDIRECTORY( samples/SimpleOpenGL/ )
 ENDIF ()
 
-# IF ( ASSIMP_BUILD_TESTS )
-#   ADD_SUBDIRECTORY( test/ )
-# ENDIF ()
+IF ( ASSIMP_BUILD_TESTS )
+  ADD_SUBDIRECTORY( test/ )
+ENDIF ()
 
 # Generate a pkg-config .pc, revision.h, and config.h for the Assimp library.
 CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/assimp.pc.in" "${PROJECT_BINARY_DIR}/assimp.pc" @ONLY )

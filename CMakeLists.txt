@@ -70,12 +70,13 @@ function(Add exec_name)
 endfunction()
 
 # Basics
-Add(1HelloTriangle)
-Add(2HelloRect)
-Add(3Texture)
-Add(4ProjectionViewAndModel)
-Add(5FpsCameraControls)
+Add(1_HelloTriangle)
+Add(2_HelloRect)
+Add(3_Texture)
+Add(4_ProjectionViewAndModel)
+Add(5_FpsCameraControls)
 
 # Phong Lighting
-Add(6BasicPhongLighting)
-Add(7PhongMaterials)
+Add(6_BasicLights_Phong)
+Add(7_BasicLights_Materials)
+Add(8_BasicLights_LightCasters)
