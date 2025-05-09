@@ -1,11 +1,11 @@
-set(required_preprocessor_definitions)
-set(platform_specific_compiler_options)
+set(REQUIRED_PREPROCESSOR_DEFINITIONS)
+set(PLATFORM_SPECIFIC_COMPILER_OPTIONS)
 
 # Platform specific definitions
 if (WIN32)
     if (MSVC)
-        list(APPEND platform_specific_compiler_options "/utf-8")
-        list(APPEND required_preprocessor_definitions "_CRT_SECURE_NO_WARNINGS")
+        list(APPEND PLATFORM_SPECIFIC_COMPILER_OPTIONS "/utf-8")
+        list(APPEND REQUIRED_PREPROCESSOR_DEFINITIONS "_CRT_SECURE_NO_WARNINGS")
     endif()
 elseif (UNIX)
     if (APPLE)

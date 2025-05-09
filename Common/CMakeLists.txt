@@ -1,12 +1,12 @@
 include(../CMake/Compiler.cmake)
 add_subdirectory(Thirdparty)
 
-file(GLOB_RECURSE hdr_files CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Src/*.h")
-file(GLOB_RECURSE src_files CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Src/*.cpp")
+file(GLOB_RECURSE HDR_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Src/*.h")
+file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Src/*.cpp")
 
 add_library(Common
-    ${hdr_files}
-    ${src_files}
+    ${HDR_FILES}
+    ${SRC_FILES}
 )
 target_include_directories(Common PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/
@@ -26,12 +26,12 @@ target_link_libraries(Common PUBLIC
     assimp::assimp
 )
 target_compile_definitions(Common PUBLIC
-    ${required_preprocessor_definitions}
-    RESOURCE_DIR="${resource_directory}"
+    ${REQUIRED_PREPROCESSOR_DEFINITIONS}
+    RESOURCE_DIR="${RESOURCE_DIRECTORY}"
 	GLFW_INCLUDE_NONE
 )
 target_compile_options(Common PUBLIC
-    ${platform_specific_compiler_options}
+    ${PLATFORM_SPECIFIC_COMPILER_OPTIONS}
 )
 target_precompile_headers(Common PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/pch.h

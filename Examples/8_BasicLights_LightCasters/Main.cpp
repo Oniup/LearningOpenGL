@@ -39,6 +39,7 @@ struct alignas(16) SpotLight
     alignas(16) glm::vec3 Direction;
     alignas(16) glm::vec3 Color;
     float Intensity;
+    float CutOff;
     float Linear;
     float Quadratic;
 };
@@ -169,7 +170,7 @@ int main(int argc, char** argv)
                 ImGui::DragFloat("FOV", &camera.Fov);
                 ImGui::DragFloat("Mouse Sensitivity", &camera.MouseSensitivity, 0.01f);
 
-                camera.Fov = std::clamp(camera.Fov, 5.0f, 90.0f);
+                // camera.Fov = std::clamp(camera.Fov, 5.0f, 90.0f);
                 camera.MouseSensitivity = std::clamp(camera.MouseSensitivity, 0.0f, 2.0f);
                 if (lastFov != camera.Fov)
                 {
@@ -209,10 +210,6 @@ void Lights::Create()
     DirectionalCount = 0;
     PointCount = 0;
     SpotCount = 0;
-    // Points[0].Color = glm::vec3(1.0f);
-    // Points[0].Position = glm::vec3(0.0f, 0.0f, -5.0f);
-    // Points[0].Intensity = 1.0f;
-    // SetDistance(Points[0], 50.0f);
 }
 
 void Lights::BindUniformBufferToIndex(unsigned int index)

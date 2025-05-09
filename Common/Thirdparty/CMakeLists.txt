@@ -85,9 +85,10 @@ endif()
 set_target_properties(imgui PROPERTIES FOLDER "Common Dependencies")
 
 # Assimp
-# option(ASSIMP_INSTALL OFF)
 option(ASSIMP_BUILD_TESTS OFF)
-# option(ASSIMP_INSTALL_PDB OFF)
+option(ASSIMP_INSTALL OFF)
+option(ASSIMP_INSTALL_PDB OFF)
 add_subdirectory(Assimp)
 set_target_properties(assimp PROPERTIES FOLDER "Common Dependencies")
-set_target_properties(zlibstatic PROPERTIES FOLDER "Common Dependencies")
+set_target_properties(zlibstatic PROPERTIES FOLDER "Common Dependencies/Assimp")
+set_target_properties(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER "Common Dependencies/Assimp")

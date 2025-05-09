@@ -8,8 +8,8 @@ SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_SUPPRESS_REGENERATION TRUE) # Removes uncessessary cmake files when generating MSVC project file
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE) #link time optimization
 
-set(resource_directory "${CMAKE_CURRENT_SOURCE_DIR}/Resources" CACHE INTERNAL "")
-set(binary_output_directory "${CMAKE_CURRENT_SOURCE_DIR}/Build/${CMAKE_BUILD_TYPE}")
+set(RESOURCE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Resources" CACHE INTERNAL "")
+set(BINARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Build/${CMAKE_BUILD_TYPE}")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${binary_output_directory}/Archive")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${binary_output_directory}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${binary_output_directory}")
@@ -22,49 +22,49 @@ project(
 include(CMake/Compiler.cmake)
 add_subdirectory(Common)
 
-function(Add exec_name)
-    file(GLOB hdr_files CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Examples/${exec_name}/*.h")
-    file(GLOB src_files CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Examples/${exec_name}/*.cpp")
+function(Add EXEC_NAME)
+    file(GLOB HDR_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Examples/${EXEC_NAME}/*.h")
+    file(GLOB SRC_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Examples/${EXEC_NAME}/*.cpp")
 
     # Shaders
-    file(GLOB shader_vert_files CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Examples/${exec_name}/*.vert")
-    file(GLOB shader_frag_files CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Examples/${exec_name}/*.frag")
-    file(GLOB shader_geom_files CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Examples/${exec_name}/*.geom")
-    file(GLOB shader_comp_files CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Examples/${exec_name}/*.comp")
+    file(GLOB SHADER_VERT_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Examples/${EXEC_NAME}/*.vert")
+    file(GLOB SHADER_FRAG_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Examples/${EXEC_NAME}/*.frag")
+    file(GLOB SHADER_GEOM_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Examples/${EXEC_NAME}/*.geom")
+    file(GLOB SHADER_COMP_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Examples/${EXEC_NAME}/*.comp")
 
     # Image files
-    file(GLOB image_jpg_files CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Examples/${exec_name}/*.jpg")
-    file(GLOB image_png_files CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Examples/${exec_name}/*.png")
+    file(GLOB IMAGE_JPG_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Examples/${EXEC_NAME}/*.jpg")
+    file(GLOB IMAGE_PNG_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR} "Examples/${EXEC_NAME}/*.png")
 
-    add_executable(${exec_name}
-        ${hdr_files}
-        ${src_files}
+    add_executable(${EXEC_NAME}
+        ${HDR_FILES}
+        ${SRC_FILES}
 
-        ${shader_vert_files}
-        ${shader_frag_files}
-        ${shader_geom_files}
-        ${shader_comp_files}
+        ${SHADER_VERT_FILES}
+        ${SHADER_FRAG_FILES}
+        ${SHADER_GEOM_FILES}
+        ${SHADER_COMP_FILES}
 
-        ${image_jpg_files}
-        ${image_png_files}
+        ${IMAGE_JPG_FILES}
+        ${IMAGE_PNG_FILES}
     )
-    target_include_directories(${exec_name} PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/Examples/${exec_name}
+    target_include_directories(${EXEC_NAME} PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/Examples/${EXEC_NAME}
         ${Common_INCLUDE_DIRS}
     )
-    target_link_libraries(${exec_name} PUBLIC
+    target_link_libraries(${EXEC_NAME} PUBLIC
         Common
     )
-    target_compile_definitions(${exec_name} PUBLIC
-        PROJECT_NAME="${exec_name}"
-        PROJECT_DIR="${CMAKE_CURRENT_SOURCE_DIR}/Examples/${exec_name}"
+    target_compile_definitions(${EXEC_NAME} PUBLIC
+        PROJECT_NAME="${EXEC_NAME}"
+        PROJECT_DIR="${CMAKE_CURRENT_SOURCE_DIR}/Examples/${EXEC_NAME}"
     )
-    target_compile_options(${exec_name} PUBLIC
+    target_compile_options(${EXEC_NAME} PUBLIC
         ${platform_specific_compiler_options}
     )
     if (WIN32 AND MSVC)
-        set_target_properties(${exec_name} PROPERTIES
-            VS_DEBUGGER_WORKING_DIRECTORY "${binary_output_directory}/"
+        set_target_properties(${EXEC_NAME} PROPERTIES
+            VS_DEBUGGER_WORKING_DIRECTORY "${BINARY_OUTPUT_DIRECTORY}/"
         )
     endif()
 endfunction()

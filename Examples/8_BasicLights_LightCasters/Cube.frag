@@ -27,6 +27,7 @@ struct SpotLight
     vec3 Direction;
     vec3 Color;
     float Intensity;
+    float CutOff;
     float Linear;
     float Quadratic;
 };
@@ -112,11 +113,10 @@ vec3 DirectionalLights(vec3 diffuseMap, vec3 specularMap, vec3 viewDirection)
     for (int i = 0; i < DirectionalCount; ++i)
     {
         vec3 lightDirection = -Directionals[i].Direction;
-        vec3 ambientLighting = Directionals[i].AmbientColor;
         vec3 diffuseLighting = CalcDiffuse(lightDirection, Directionals[i].Color);
         vec3 specularLighting = CalcSpecular(lightDirection, Directionals[i].Color, viewDirection);
 
-        ambient += ambientLighting;
+        ambient += Directionals[i].AmbientColor;
         diffuse += diffuseLighting * Directionals[i].Intensity;
         specular += specularLighting * Directionals[i].Intensity;
     }
