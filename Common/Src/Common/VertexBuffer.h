@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Common/Mesh.h"
+#include "Common/Vertex.h"
 
 namespace Cm
 {
@@ -31,11 +31,13 @@ namespace Cm
         void Bind();
         void Unbind();
 
-        void PushData(size_t vertexCount, const Vertex* vertices);
-        void PushData(size_t elementCount, const unsigned int* elements);
+        void PushData(size_t vertexCount, const Vertex* indices);
+        void PushData(size_t indicesCount, const unsigned int* indices);
+        void PushData(const std::vector<Vertex>& vertices);
+        void PushData(const std::vector<unsigned int>& elements);
 
         void PushData(size_t offset, size_t vertexCount, const Vertex* vertices);
-        void PushData(size_t offset, size_t elementCount, const unsigned int* elements);
+        void PushData(size_t offset, size_t indicesCount, const unsigned int* indices);
 
         void Draw(DrawMode mode);
 
@@ -43,7 +45,7 @@ namespace Cm
         Type m_Type;
         unsigned int m_Arrays;
         unsigned int m_Vertices;
-        unsigned int m_Elements;
+        unsigned int m_Indices;
         unsigned int m_DataCount;
     };
 }

@@ -13,6 +13,17 @@ namespace Cm
         return glm::lookAt(Position, Position - Forward, Up);
     }
 
+    glm::mat4 Camera::GetProjectionMatrix(const Context& context)
+    {
+        int width, height;
+        context.GetWindow().GetSize(&width, &height);
+
+        if (Projection == Perspective)
+            return glm::perspective(glm::radians(Fov), (float)width / (float)height, Near, Far);
+
+        return glm::mat4(0.0f);
+    }
+
     FirstPersonCamera::FirstPersonCamera(const Context& context)
     {
         glfwSetCursorPosCallback(context.GetWindow().GetInternalWindow(), Cm::FirstPersonCamera::MouseCallback);
@@ -80,7 +91,7 @@ namespace Cm
         }
         MouseXOffset = 0.0f;
         MouseYOffset = 0.0f;
-    }
+   }
 
     void FirstPersonCamera::MouseCallback(GLFWwindow* window, double xPos, double yPos)
     {

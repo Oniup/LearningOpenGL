@@ -13,7 +13,7 @@ target_include_directories(Common PUBLIC
     ${glad_INCLUDE_DIRS}
     ${glfw_INCLUDE_DIRS}
     ${glm_INCLUDE_DIRS}
-    ${ImGui_INCLUDE_DIRS}
+    ${imgui_INCLUDE_DIRS}
     ${stb_INCLUDE_DIRS}
     ${assimp_INCLUDE_DIRS}
 )
@@ -21,7 +21,7 @@ target_link_libraries(Common PUBLIC
     glm
     glad
     glfw
-    ImGui
+    imgui
     stb
     assimp::assimp
 )

@@ -5,6 +5,11 @@
 
 namespace Cm
 {
+    Texture::Texture()
+        : m_GpuId(UINT32_MAX)
+    {
+    }
+
     Texture::Texture(const std::string_view& path, TextureFilter filter, bool generateMipmap)
     {
         int width, height, channels;
@@ -52,6 +57,25 @@ namespace Cm
     }
 
     Texture::~Texture()
+    {
+        Destroy();
+    }
+
+    Texture::Texture(Texture&& texture)
+        : m_GpuId(texture.m_GpuId)
+    {
+        texture.m_GpuId = UINT32_MAX;
+    }
+
+    Texture& Texture::operator=(Texture&& texture)
+    {
+        Destroy();
+        m_GpuId = texture.m_GpuId;
+        texture.m_GpuId = UINT32_MAX;
+        return *this;
+    }
+
+    void Texture::Destroy()
     {
         if (m_GpuId != UINT32_MAX)
         {

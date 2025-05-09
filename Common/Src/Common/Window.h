@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string_view>
+#include <glm/glm.hpp>
 
 // Forward declare
 struct GLFWwindow;
@@ -20,6 +21,8 @@ namespace Cm
     };
 
     typedef void(*PfnWindowDpiChange)(float xScale, float yScale);
+
+    glm::ivec2 GetPrimaryMonitorSize();
 
     class Window
     {

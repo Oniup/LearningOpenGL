@@ -28,7 +28,7 @@ uniform vec3 u_ViewPosition;
 
 uniform Material u_Material;
 
-in VS_VERTEX 
+in VS_VERTEX
 {
     vec3 Position;
     vec3 Normal;
@@ -55,15 +55,13 @@ vec3 SpecularLighting(vec3 lightDirecftion, vec3 lightColor)
 float CalcAttenuation(Light light)
 {
     float dist = length(light.Position - Vertex.Position);
-    float atten = 1.0 / (1.0 + light.Linear * dist + light.Quadratic * (dist * dist));;
+    float atten = 1.0 / (1.0 + light.Linear * dist + light.Quadratic * (dist * dist));
     return atten;
 }
 
 void main()
 {
     vec4 diffuseMap = texture(u_Material.DiffuseMap, Vertex.UV);
-    if (diffuseMap.a < 0.05)
-        discard;
     vec4 specularMap = texture(u_Material.SpecularMap, Vertex.UV);
 
     vec3 ambient = vec3(0.0);
@@ -86,11 +84,13 @@ void main()
         specularLighting *= attenuation;
 
         ambient += ambientLighting;
-        diffuse += diffuseLighting * diffuseMap.rgb;
-        specular += specularLighting * specularMap.rgb;
+        diffuse += diffuseLighting;
+        specular += specularLighting;
     }
 
-    vec3 color = ambient + diffuse + specular;
+    specular *= specularMap.rgb;
+
+    vec3 color = (ambient + diffuse + specular) * diffuseMap.rgb;
     if (u_Material.EnableEmissionMap && specularMap.rgb == vec3(0.0))
     {
         vec4 emissionMap = texture(u_Material.EmissionMap, Vertex.UV);

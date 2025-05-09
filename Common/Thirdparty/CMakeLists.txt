@@ -44,7 +44,7 @@ set_target_properties(stb PROPERTIES FOLDER "Common Dependencies")
 # ---------------------------------------------------------------------------------------------------------------------
 
 # ImGui
-add_library(ImGui STATIC
+add_library(imgui STATIC
 	${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui/imconfig.h
 	${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui/imgui_demo.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui/imgui_draw.cpp
@@ -64,26 +64,30 @@ add_library(ImGui STATIC
 	${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui/backends/imgui_impl_opengl3.h
 	${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui/backends/imgui_impl_opengl3.cpp
 )
-target_include_directories(ImGui
+target_include_directories(imgui
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/imgui
     ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui
     ${glad_INCLUDE_DIRS}
     ${glfw_INCLUDE_DIRS}
 )
-target_link_libraries(ImGui
+target_link_libraries(imgui
     PUBLIC
     glfw
     glad
 )
 if (WIN32 AND MSVC)
-    target_compile_definitions(ImGui
+    target_compile_definitions(imgui
         PUBLIC
         "_CRT_SECURE_NO_WARNINGS"
     )
 endif()
-set_target_properties(ImGui PROPERTIES FOLDER "Common Dependencies")
+set_target_properties(imgui PROPERTIES FOLDER "Common Dependencies")
 
 # Assimp
+# option(ASSIMP_INSTALL OFF)
 option(ASSIMP_BUILD_TESTS OFF)
+# option(ASSIMP_INSTALL_PDB OFF)
 add_subdirectory(Assimp)
+set_target_properties(assimp PROPERTIES FOLDER "Common Dependencies")
+set_target_properties(zlibstatic PROPERTIES FOLDER "Common Dependencies")

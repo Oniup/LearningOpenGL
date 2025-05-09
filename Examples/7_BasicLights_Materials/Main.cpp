@@ -1,17 +1,15 @@
+#include <random>
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <imgui/imgui.h>
-#include <iostream>
-#include <random>
 
 #include "Common/Camera.h"
 #include "Common/Color.h"
 #include "Common/Context.h"
-#include "Common/Mesh.h"
 #include "Common/Shader.h"
 #include "Common/Texture.h"
+#include "Common/Vertex.h"
 #include "Common/VertexBuffer.h"
 #include "Common/Window.h"
 
@@ -22,7 +20,7 @@ struct Light
     Cm::Transform Transform;
     glm::vec3 Color = glm::vec3(1.0f);
 
-    float Intencity;
+    float Intensity;
     float Linear;
     float Quadratic;
 };
@@ -41,13 +39,13 @@ struct Cube
     Material Material;
 };
 
-void CalcLightIntencity(Light& light)
+void CalcLightIntensity(Light& light)
 {
-    const float a = 0.640f;
-    const float b = 0.130f;
-    const float c = 83.300f;
-    light.Linear = a / (light.Intencity * b);
-    light.Quadratic = c / (light.Intencity * light.Intencity);
+    constexpr float a = 0.640f;
+    constexpr float b = 0.130f;
+    constexpr float c = 83.300f;
+    light.Linear = a / (light.Intensity * b);
+    light.Quadratic = c / (light.Intensity * light.Intensity);
 }
 
 void AddLight(std::vector<Light>& lights)
@@ -56,8 +54,8 @@ void AddLight(std::vector<Light>& lights)
     light.Transform.Position = glm::vec3(0.0f);
     light.Transform.Rotation = glm::vec3(0.0f);
     light.Transform.Scale = glm::vec3(0.1f);
-    light.Intencity = 50.0f;
-    CalcLightIntencity(light);
+    light.Intensity = 50.0f;
+    CalcLightIntensity(light);
     lights.push_back(std::move(light));
 }
 
@@ -133,8 +131,8 @@ int main(int argc, char** argv)
                     {
                         ImGui::DragFloat3("Position", &lights[i].Transform.Position[0], 0.05f);
                         ImGui::ColorEdit3("Color", &lights[i].Color[0]);
-                        ImGui::DragFloat("Intencity", &lights[i].Intencity, 1.0f, 0.1f);
-                        CalcLightIntencity(lights[i]);
+                        ImGui::DragFloat("Intencity", &lights[i].Intensity, 1.0f, 0.1f);
+                        CalcLightIntensity(lights[i]);
                         ImGui::Text("Linear: %f, Quadratic: %f", lights[i].Linear, lights[i].Quadratic);
                     }
                     ImGui::PopID();
@@ -198,7 +196,6 @@ int main(int argc, char** argv)
             cubeShader.UniformF3("u_ViewPosition", camera.Position);
             cubeShader.UniformMat4("u_Model", cube.Transform.GetModel());
             cubeVertexBuffer.Draw(Cm::DrawMode::Triangles);
-            glDrawArrays(GL_TRIANGLES, 0, Cm::Cube::VertexCount);
         }
 
         lightShader.Bind();
@@ -206,7 +203,6 @@ int main(int argc, char** argv)
         {
             lightShader.UniformMat4("u_Model", light.Transform.GetModel());
             lightShader.UniformF3("u_LightColor", light.Color);
-            glDrawArrays(GL_TRIANGLES, 0, Cm::Cube::VertexCount);
             cubeVertexBuffer.Draw(Cm::DrawMode::Triangles);
         }
 

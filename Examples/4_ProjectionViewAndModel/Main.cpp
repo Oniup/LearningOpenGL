@@ -7,9 +7,9 @@
 #include <imgui/imgui.h>
 
 #include "Common/Context.h"
-#include "Common/Mesh.h"
 #include "Common/Shader.h"
 #include "Common/Texture.h"
+#include "Common/Vertex.h"
 #include "Common/Window.h"
 
 struct Transform

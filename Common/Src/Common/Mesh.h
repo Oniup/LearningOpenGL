@@ -1,88 +1,75 @@
 #pragma once
 
-#include <random>
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
+#include "Common/Shader.h"
+#include "Common/Texture.h"
+#include "Common/Vertex.h"
+#include "Common/VertexBuffer.h"
 
-#define CM_PI 3.141592653589793
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 namespace Cm
 {
-    struct Transform
+    class Mesh
     {
-        glm::vec3 Position = glm::vec3(0.0f);
-        glm::vec3 Rotation = glm::vec3(0.0f);
-        glm::vec3 Scale = glm::vec3(1.0f);
-
-        static std::vector<Cm::Transform> GenerateMultiRandom(size_t count, float minPos = -4.0f, float maxPos = 4.0f);
-
-        glm::mat4 GetModel() const;
-        void GenerateRandom(float minPos = -4.0f, float maxPos = 4.0f);
-    };
-
-    struct Vertex
-    {
-        glm::vec3 Position;
-        glm::vec3 Normal;
-        glm::vec2 UV;
-    };
-
-    struct Mesh
-    {
-        std::vector<Vertex> Vertices;
-        std::vector<uint32_t> Indices;
-    };
-
-    struct Cube
-    {
-        static constexpr Vertex Vertices[] = {
-            {glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(0.0f, 0.0f)},
-            {glm::vec3(1.0f, -1.0f, -1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(1.0f, 0.0f)},
-            {glm::vec3(1.0f, 1.0f, -1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(1.0f, 1.0f)},
-            {glm::vec3(1.0f, 1.0f, -1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(1.0f, 1.0f)},
-            {glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(0.0f, 1.0f)},
-            {glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(0.0f, 0.0f)},
-
-            {glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 0.0f)},
-            {glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 0.0f)},
-            {glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 1.0f)},
-            {glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 1.0f)},
-            {glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 1.0f)},
-            {glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 0.0f)},
-
-            {glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f)},
-            {glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f)},
-            {glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f)},
-            {glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f)},
-            {glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f)},
-            {glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f)},
-
-            {glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f)},
-            {glm::vec3(1.0f, 1.0f, -1.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f)},
-            {glm::vec3(1.0f, -1.0f, -1.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f)},
-            {glm::vec3(1.0f, -1.0f, -1.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f)},
-            {glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f)},
-            {glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f)},
-
-            {glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(0.0f, 1.0f)},
-            {glm::vec3(1.0f, -1.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(1.0f, 1.0f)},
-            {glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(1.0f, 0.0f)},
-            {glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(1.0f, 0.0f)},
-            {glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(0.0f, 0.0f)},
-            {glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(0.0f, 1.0f)},
-
-            {glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(0.0f, 1.0f)},
-            {glm::vec3(1.0f, 1.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(1.0f, 1.0f)},
-            {glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(1.0f, 0.0f)},
-            {glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(1.0f, 0.0f)},
-            {glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(0.0f, 0.0f)},
-            {glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(0.0f, 1.0f)},
+    public:
+        enum class TextureType
+        {
+            Phong_Diffuse,
+            Phong_Specular,
+            Phong_Emission,
         };
 
-        // static constexpr unsigned int Indices[] = {
-        // };
+        struct TextureEntry
+        {
+            Texture* Texture;
+            TextureType Type;
+        };
 
-        static constexpr size_t VertexCount = std::size(Vertices);
-        // static constexpr size_t IndicesCount = std::size(Indices);
+    public:
+        Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, const std::vector<TextureEntry>& textures, VertexBuffer::Type vertexDataType = VertexBuffer::Static);
+        ~Mesh();
+
+        const VertexBuffer& GpuVertexBuffer() const
+        {
+            return m_VertexBuffer;
+        }
+
+        const std::vector<TextureEntry>& Textures() const
+        {
+            return m_Textures;
+        }
+
+        void Draw(Shader& shader);
+
+    private:
+        VertexBuffer m_VertexBuffer;
+        std::vector<TextureEntry> m_Textures;
+    };
+
+    class Model
+    {
+        struct LoadedTexture
+        {
+            Texture Texture;
+            std::string Name;
+        };
+
+    public:
+        Model(const std::string_view& path);
+        ~Model();
+
+        void Draw(Shader& shader);
+
+    private:
+        void LoadModel(const std::string_view& path);
+        void ProcessNode(const std::string& directory, const aiNode* node, const aiScene* scene);
+        void ProcessMesh(const std::string& directory, const aiMesh* mesh, const aiScene* scene);
+        void LoadMaterialTextures(const std::string& directory, const aiMaterial* mat, aiTextureType type, std::vector<Mesh::TextureEntry>& out);
+
+    private:
+        std::vector<Mesh> m_Meshes;
+        std::vector<LoadedTexture> m_LoadedTextures;
     };
 }

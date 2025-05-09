@@ -5,7 +5,7 @@
 namespace Cm
 {
     VertexBuffer::VertexBuffer(Type type)
-        : m_Type(type), m_Elements(UINT32_MAX), m_DataCount(0)
+        : m_Type(type), m_Indices(UINT32_MAX), m_DataCount(0)
     {
         glGenVertexArrays(1, &m_Arrays);
         glGenBuffers(1, &m_Vertices);
@@ -28,13 +28,13 @@ namespace Cm
         {
             glDeleteVertexArrays(1, &m_Arrays);
             glDeleteBuffers(1, &m_Vertices);
-            if (m_Elements != UINT32_MAX)
+            if (m_Indices != UINT32_MAX)
             {
-                glDeleteBuffers(1, &m_Elements);
+                glDeleteBuffers(1, &m_Indices);
             }
             m_Arrays = UINT32_MAX;
             m_Vertices = UINT32_MAX;
-            m_Elements = UINT32_MAX;
+            m_Indices = UINT32_MAX;
             m_DataCount = 0;
         }
     }
@@ -54,18 +54,28 @@ namespace Cm
         glBindVertexArray(m_Arrays);
         glBindBuffer(GL_ARRAY_BUFFER, m_Vertices);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexCount, vertices, m_Type == Static ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
-        if (m_Elements == UINT32_MAX)
+        if (m_Indices == UINT32_MAX)
             m_DataCount = vertexCount;
     }
 
-    void VertexBuffer::PushData(size_t elementCount, const unsigned int* elements)
+    void VertexBuffer::PushData(size_t indicesCount, const unsigned int* indicess)
     {
         glBindVertexArray(m_Arrays);
-        if (m_Elements != UINT32_MAX)
-            glGenBuffers(1, &m_Elements);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Elements);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * elementCount, elements, m_Type == Static ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
-        m_DataCount = elementCount;
+        if (m_Indices != UINT32_MAX)
+            glGenBuffers(1, &m_Indices);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Indices);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indicesCount, indicess, m_Type == Static ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+        m_DataCount = indicesCount;
+    }
+
+    void VertexBuffer::PushData(const std::vector<Vertex>& vertices)
+    {
+        PushData(vertices.size(), vertices.data());
+    }
+
+    void VertexBuffer::PushData(const std::vector<unsigned int>& indicess)
+    {
+        PushData(indicess.size(), indicess.data());
     }
 
     void VertexBuffer::PushData(size_t offset, size_t vertexCount, const Vertex* vertices)
@@ -77,19 +87,19 @@ namespace Cm
         glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vertex) * offset, sizeof(Vertex) * vertexCount, vertices);
     }
 
-    void VertexBuffer::PushData(size_t offset, size_t elementCount, const unsigned int* elements)
+    void VertexBuffer::PushData(size_t offset, size_t indicesCount, const unsigned int* indicess)
     {
         glBindVertexArray(m_Arrays);
-        if (m_Elements != UINT32_MAX)
-            PushData(offset + elementCount, (unsigned int*)nullptr);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Elements);
-        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * offset, sizeof(unsigned int) * elementCount, elements);
+        if (m_Indices != UINT32_MAX)
+            PushData(offset + indicesCount, (unsigned int*)nullptr);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Indices);
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * offset, sizeof(unsigned int) * indicesCount, indicess);
     }
 
     void VertexBuffer::Draw(DrawMode mode)
     {
         glBindVertexArray(m_Arrays);
-        if (m_Elements != UINT32_MAX)
+        if (m_Indices != UINT32_MAX)
             glDrawElements((GLenum)mode, m_DataCount, GL_UNSIGNED_INT, (void*)0);
         else
             glDrawArrays((GLenum)mode, 0, m_DataCount);
