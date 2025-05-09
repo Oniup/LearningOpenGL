@@ -20,18 +20,18 @@ struct Light
     Cm::Transform Transform;
     glm::vec3 Color = glm::vec3(1.0f);
 
-    float Intensity;
+    float Distance;
     float Linear;
     float Quadratic;
 };
 
-void CalcLightIntensity(Light& light)
+void CalcLightDistance(Light& light)
 {
     constexpr float a = 0.640f;
     constexpr float b = 0.130f;
     constexpr float c = 83.300f;
-    light.Linear = a / (light.Intensity * b);
-    light.Quadratic = c / (light.Intensity * light.Intensity);
+    light.Linear = a / (light.Distance * b);
+    light.Quadratic = c / (light.Distance * light.Distance);
 }
 
 void AddLight(std::vector<Light>& lights)
@@ -40,8 +40,8 @@ void AddLight(std::vector<Light>& lights)
     light.Transform.Position = glm::vec3(0.0f);
     light.Transform.Rotation = glm::vec3(0.0f);
     light.Transform.Scale = glm::vec3(0.1f);
-    light.Intensity = 50.0f;
-    CalcLightIntensity(light);
+    light.Distance = 50.0f;
+    CalcLightDistance(light);
     lights.push_back(std::move(light));
 }
 
@@ -103,8 +103,8 @@ int main(int argc, char** argv)
                     {
                         ImGui::DragFloat3("Position", &lights[i].Transform.Position[0], 0.05f);
                         ImGui::ColorEdit3("Color", &lights[i].Color[0]);
-                        ImGui::DragFloat("Intencity", &lights[i].Intensity, 1.0f, 0.1f);
-                        CalcLightIntensity(lights[i]);
+                        ImGui::DragFloat("Intencity", &lights[i].Distance, 1.0f, 0.1f);
+                        CalcLightDistance(lights[i]);
                         ImGui::Text("Linear: %f, Quadratic: %f", lights[i].Linear, lights[i].Quadratic);
                     }
                     ImGui::PopID();

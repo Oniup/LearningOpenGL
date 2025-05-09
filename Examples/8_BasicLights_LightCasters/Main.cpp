@@ -262,7 +262,7 @@ void Lights::SetImGuiOptions()
     {
         static float snap = 0.2f;
         ImGui::DragFloat("Drag Value Speed", &snap, 0.1f);
-        if (ImGui::TreeNodeEx("Directional", ImGuiTreeNodeFlags_DefaultOpen))
+        if (ImGui::TreeNode("Directional"))
         {
             if (DirectionalCount < MAX_LIGHT_COUNT_DIRECTIONAL && ImGui::Button("Add"))
             {
@@ -271,12 +271,12 @@ void Lights::SetImGuiOptions()
                 light.Color = glm::vec3(1.0f);
                 light.AmbientColor = glm::vec3(0.1f);
                 light.Intensity = 1.0f;
-                DirectionalCount++;
+                ++DirectionalCount;
             }
             for (size_t i = 0; i < DirectionalCount; ++i)
             {
                 ImGui::PushID(i);
-                if (ImGui::TreeNodeEx((std::string("Directional Light ") + std::to_string(i + 1)).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+                if (ImGui::TreeNodeEx((std::string("Light ") + std::to_string(i + 1)).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     DirectionalLight& light = Directionals[i];
                     ImGui::DragFloat3("Direction", &light.Direction[0], 0.05f, -1.0f, 1.0f);
@@ -290,7 +290,7 @@ void Lights::SetImGuiOptions()
             ImGui::TreePop();
         }
         ImGui::Separator();
-        if (ImGui::TreeNodeEx("Point", ImGuiTreeNodeFlags_DefaultOpen))
+        if (ImGui::TreeNode("Point"))
         {
             if (PointCount < MAX_LIGHT_COUNT_POINT && ImGui::Button("Add"))
             {
@@ -299,12 +299,12 @@ void Lights::SetImGuiOptions()
                 light.Color = glm::vec3(1.0f);
                 light.Intensity = 1.0f;
                 SetDistance(light, 50.0f);
-                PointCount++;
+                ++PointCount;
             }
             for (size_t i = 0; i < PointCount; ++i)
             {
                 ImGui::PushID(i);
-                if (ImGui::TreeNodeEx((std::string("Point Light ") + std::to_string(i + 1)).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+                if (ImGui::TreeNodeEx((std::string("Light ") + std::to_string(i + 1)).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     PointLight& light = Points[i];
                     ImGui::DragFloat3("Position", &light.Position[0], snap);
@@ -315,6 +315,43 @@ void Lights::SetImGuiOptions()
                     ImGui::DragFloat("Distance", &distance);
                     if (lastDistance != distance)
                         SetDistance(light, distance);
+                    ImGui::TreePop();
+                }
+                ImGui::PopID();
+            }
+            ImGui::TreePop();
+        }
+        ImGui::Separator();
+        if (ImGui::TreeNode("Spot"))
+        {
+            if (SpotCount < MAX_LIGHT_COUNT_SPOT && ImGui::Button("Add"))
+            {
+                SpotLight& light = Spots[SpotCount];
+                light.Position = glm::vec3(0.0f);
+                light.Direction = glm::vec3(0.0f, 0.0f, 1.0f);
+                light.Color = glm::vec3(1.0f);
+                light.Intensity = 1.0f;
+                light.CutOff = glm::radians(12.5f);
+                SetDistance(light, 50.0f);
+                ++SpotCount;
+            }
+            for (size_t i = 0; i < SpotCount; ++i)
+            {
+                ImGui::PushID(i);
+                if (ImGui::TreeNodeEx((std::string("Light ") + std::to_string(i + 1)).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+                {
+                    SpotLight& light = Spots[i];
+                    ImGui::DragFloat3("Position", &light.Position[0], snap);
+                    ImGui::DragFloat3("Direction", &light.Direction[0], 0.05f, -1.0f, 1.0f);
+                    ImGui::ColorEdit3("Color", &light.Color[0]);
+                    ImGui::DragFloat("Intensity", &light.Intensity, 0.05f);
+                    ImGui::DragFloat("CutOff", &light.CutOff, 0.5f);
+                    float distance = GetDistance(light);
+                    float lastDistance = distance;
+                    ImGui::DragFloat("Distance", &distance);
+                    if (lastDistance != distance)
+                        SetDistance(light, distance);
+                    light.CutOff = std::clamp(light.CutOff, 0.0f, 50.0f);
                     ImGui::TreePop();
                 }
                 ImGui::PopID();
