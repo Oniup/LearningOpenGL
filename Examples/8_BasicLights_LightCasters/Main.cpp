@@ -39,9 +39,10 @@ struct alignas(16) SpotLight
     alignas(16) glm::vec3 Direction;
     alignas(16) glm::vec3 Color;
     float Intensity;
-    float CutOff;
     float Linear;
     float Quadratic;
+    float CutOff;
+    float OuterCutOff;
 };
 
 struct Lights
@@ -328,10 +329,11 @@ void Lights::SetImGuiOptions()
             {
                 SpotLight& light = Spots[SpotCount];
                 light.Position = glm::vec3(0.0f);
-                light.Direction = glm::vec3(0.0f, 0.0f, 1.0f);
+                light.Direction = glm::vec3(0.0f, -1.0f, 0.0);
                 light.Color = glm::vec3(1.0f);
                 light.Intensity = 1.0f;
                 light.CutOff = glm::radians(12.5f);
+                light.OuterCutOff = glm::radians(17.5f);
                 SetDistance(light, 50.0f);
                 ++SpotCount;
             }
@@ -345,13 +347,22 @@ void Lights::SetImGuiOptions()
                     ImGui::DragFloat3("Direction", &light.Direction[0], 0.05f, -1.0f, 1.0f);
                     ImGui::ColorEdit3("Color", &light.Color[0]);
                     ImGui::DragFloat("Intensity", &light.Intensity, 0.05f);
-                    ImGui::DragFloat("CutOff", &light.CutOff, 0.5f);
+
+                    float cutOff = glm::degrees(light.CutOff);
+                    float outerCutOff = glm::degrees(light.OuterCutOff);
+                    ImGui::DragFloat("Cut Off", &cutOff, 0.5f);
+                    ImGui::DragFloat("Outer Cut Off", &outerCutOff, 0.5f);
+
+                    outerCutOff = std::clamp(outerCutOff, 0.0f, 100.0f);
+                    light.OuterCutOff = glm::radians(outerCutOff);
+                    cutOff = std::clamp(cutOff, 0.0f, outerCutOff);
+                    light.CutOff = glm::radians(cutOff);
+
                     float distance = GetDistance(light);
                     float lastDistance = distance;
                     ImGui::DragFloat("Distance", &distance);
                     if (lastDistance != distance)
                         SetDistance(light, distance);
-                    light.CutOff = std::clamp(light.CutOff, 0.0f, 50.0f);
                     ImGui::TreePop();
                 }
                 ImGui::PopID();

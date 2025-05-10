@@ -27,9 +27,10 @@ struct SpotLight
     vec3 Direction;
     vec3 Color;
     float Intensity;
-    float CutOff;
     float Linear;
     float Quadratic;
+    float CutOff;
+    float OuterCutOff;
 };
 
 struct Material
@@ -67,7 +68,7 @@ out vec4 FragColor;
 
 vec3 DirectionalLights(vec3 diffuseMap, vec3 specularMap, vec3 viewDirection);
 vec3 PointLights(vec3 diffuseMap, vec3 specularMap, vec3 viewDirection);
-vec3 SpotLights(vec3 diffuseMap, vec3 specularMap);
+vec3 SpotLights(vec3 diffuseMap, vec3 specularMap, vec3 viewDirection);
 
 void main()
 {
@@ -75,15 +76,14 @@ void main()
     vec4 specularMap = texture(u_Material.SpecularMap, Vertex.UV);
     vec3 viewDirection = normalize(u_ViewPosition - Vertex.Position);
 
-    vec3 pointLighting = PointLights(diffuseMap.rgb, specularMap.rgb, viewDirection);
     vec3 directionalLighting = DirectionalLights(diffuseMap.rgb, specularMap.rgb, viewDirection);
-    FragColor = vec4(pointLighting + directionalLighting, 1.0);
+    vec3 pointLighting = PointLights(diffuseMap.rgb, specularMap.rgb, viewDirection);
+    vec3 spotLighting = SpotLights(diffuseMap.rgb, specularMap.rgb, viewDirection);
+    FragColor = vec4(directionalLighting + pointLighting + spotLighting, 1.0);
 
-    if (u_Material.EnableEmissionMap)
-    {
-        vec4 emissionMap = texture(u_Material.EmissionMap, Vertex.UV);
-        FragColor += emissionMap;
-    }
+    // Check if we wan't the emission map to be enabled
+    vec4 emissionMap = texture(u_Material.EmissionMap, Vertex.UV) * float(u_Material.EnableEmissionMap);
+    FragColor += emissionMap;
 }
 
 vec3 CalcDiffuse(vec3 lightDirection, vec3 lightColor)
@@ -145,7 +145,29 @@ vec3 PointLights(vec3 diffuseMap, vec3 specularMap, vec3 viewDirection)
     return diffuse + specular;
 }
 
-vec3 SpotLights(vec3 diffuseMap, vec3 specularMap)
+vec3 SpotLights(vec3 diffuseMap, vec3 specularMap, vec3 viewDirection)
 {
-    return vec3(0.0);
+    vec3 diffuse = vec3(0.0);
+    vec3 specular = vec3(0.0);
+    for (uint i = 0; i < SpotCount; ++i)
+    {
+        vec3 lightDirection = normalize(Spots[i].Position - Vertex.Position);
+
+        // Spot light section in: https://learnopengl.com/Lighting/Light-casters
+        float cutOff = cos(Spots[i].CutOff);
+        float outerCutOff = cos(Spots[i].OuterCutOff);
+        float theta = dot(lightDirection, normalize(-Spots[i].Direction));
+        float epsilon = cutOff - outerCutOff;
+        float cutOffIntensity = clamp((theta - outerCutOff) / epsilon, 0.0, 1.0);
+
+        vec3 diffuseLighting = CalcDiffuse(lightDirection, Spots[i].Color);
+        vec3 specularLighting = CalcSpecular(lightDirection, Spots[i].Color, viewDirection);
+        float attenuation = CalcAttenuation(Spots[i].Position, Spots[i].Linear, Spots[i].Quadratic);
+
+        diffuse += diffuseLighting * attenuation * Spots[i].Intensity * cutOffIntensity;
+        specular +=  specularLighting * attenuation * Spots[i].Intensity * cutOffIntensity;
+    }
+    diffuse *= diffuseMap;
+    specular *= specularMap;
+    return diffuse + specular;
 }

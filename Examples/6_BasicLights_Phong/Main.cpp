@@ -103,7 +103,7 @@ int main(int argc, char** argv)
                     {
                         ImGui::DragFloat3("Position", &lights[i].Transform.Position[0], 0.05f);
                         ImGui::ColorEdit3("Color", &lights[i].Color[0]);
-                        ImGui::DragFloat("Intencity", &lights[i].Distance, 1.0f, 0.1f);
+                        ImGui::DragFloat("Distance", &lights[i].Distance, 1.0f, 0.1f);
                         CalcLightDistance(lights[i]);
                         ImGui::Text("Linear: %f, Quadratic: %f", lights[i].Linear, lights[i].Quadratic);
                     }
