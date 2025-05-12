@@ -13,6 +13,7 @@ namespace Cm
     Texture::Texture(const std::string_view& path, TextureFilter filter, bool generateMipmap)
     {
         int width, height, channels;
+        stbi_set_flip_vertically_on_load(true);
         unsigned char* imageData = stbi_load(path.data(), &width, &height, &channels, 0);
         if (!imageData)
         {
@@ -73,6 +74,12 @@ namespace Cm
         m_GpuId = texture.m_GpuId;
         texture.m_GpuId = UINT32_MAX;
         return *this;
+    }
+
+    void Texture::Bind(unsigned int index)
+    {
+        glBindTexture(GL_TEXTURE_2D, m_GpuId);
+        glActiveTexture(GL_TEXTURE0 + index);
     }
 
     void Texture::Destroy()

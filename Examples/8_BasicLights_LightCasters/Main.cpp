@@ -376,8 +376,6 @@ void RenderScene(const std::vector<Cube>& scene, Cm::Shader& shader, Cm::VertexB
 {
     shader.Bind();
     vertexBuffer.Bind();
-    // shader.UniformF3("u_AmbientLight", context.GetClearColor());
-
     for (const Cube& cube : scene)
     {
         shader.UniformI("u_Material.DiffuseMap", 0);

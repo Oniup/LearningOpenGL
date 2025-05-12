@@ -42,6 +42,11 @@ namespace Cm
         void UniformI3(const std::string_view& location, const glm::ivec3& vec);
         void UniformI4(const std::string_view& location, const glm::ivec4& vec);
 
+        void UniformU(const std::string_view& location, unsigned int val);
+        void UniformU2(const std::string_view& location, const glm::uvec2& vec);
+        void UniformU3(const std::string_view& location, const glm::uvec3& vec);
+        void UniformU4(const std::string_view& location, const glm::uvec4& vec);
+
         void UniformF(const std::string_view& location, float val);
         void UniformF2(const std::string_view& location, const glm::vec2& vec);
         void UniformF3(const std::string_view& location, const glm::vec3& vec);

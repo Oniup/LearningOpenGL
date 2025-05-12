@@ -86,6 +86,26 @@ namespace Cm
         glUniform4iv(glGetUniformLocation(m_GpuId, location.data()), 1, &vec[0]);
     }
 
+    void Shader::UniformU(const std::string_view& location, unsigned int val)
+    {
+        glUniform1ui(glGetUniformLocation(m_GpuId, location.data()), val);
+    }
+
+    void Shader::UniformU2(const std::string_view& location, const glm::uvec2& vec)
+    {
+        glUniform2uiv(glGetUniformLocation(m_GpuId, location.data()), 1, &vec[0]);
+    }
+
+    void Shader::UniformU3(const std::string_view& location, const glm::uvec3& vec)
+    {
+        glUniform3uiv(glGetUniformLocation(m_GpuId, location.data()), 1, &vec[0]);
+    }
+
+    void Shader::UniformU4(const std::string_view& location, const glm::uvec4& vec)
+    {
+        glUniform4uiv(glGetUniformLocation(m_GpuId, location.data()), 1, &vec[0]);
+    }
+
     void Shader::UniformF(const std::string_view& location, float val)
     {
         glUniform1f(glGetUniformLocation(m_GpuId, location.data()), val);

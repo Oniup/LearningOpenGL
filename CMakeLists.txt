@@ -80,3 +80,5 @@ Add(5_FpsCameraControls)
 Add(6_BasicLights_Phong)
 Add(7_BasicLights_Materials)
 Add(8_BasicLights_LightCasters)
+
+Add(9_ModelLoading)

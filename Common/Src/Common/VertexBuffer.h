@@ -28,8 +28,12 @@ namespace Cm
         VertexBuffer(Type type = Static);
         ~VertexBuffer();
 
+        VertexBuffer(VertexBuffer&& buffer);
+        VertexBuffer& operator=(VertexBuffer&& buffer);
+
         void Bind();
         void Unbind();
+        void Destroy();
 
         void PushData(size_t vertexCount, const Vertex* indices);
         void PushData(size_t indicesCount, const unsigned int* indices);

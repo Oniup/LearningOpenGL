@@ -24,6 +24,46 @@ namespace Cm
 
     VertexBuffer::~VertexBuffer()
     {
+        Destroy();
+    }
+
+    VertexBuffer::VertexBuffer(VertexBuffer&& buffer)
+        : m_Type(buffer.m_Type), m_Arrays(buffer.m_Arrays), m_Vertices(buffer.m_Vertices), m_Indices(buffer.m_Indices), m_DataCount(buffer.m_DataCount)
+    {
+        buffer.m_Arrays = UINT32_MAX;
+        buffer.m_Vertices = UINT32_MAX;
+        buffer.m_Indices = UINT32_MAX;
+        buffer.m_DataCount = 0;
+    }
+
+    VertexBuffer& VertexBuffer::operator=(VertexBuffer&& buffer)
+    {
+        Destroy();
+
+        m_Arrays = buffer.m_Arrays;
+        m_Vertices = buffer.m_Vertices;
+        m_Indices = buffer.m_Indices;
+        m_DataCount = buffer.m_DataCount;
+
+        buffer.m_Arrays = UINT32_MAX;
+        buffer.m_Vertices = UINT32_MAX;
+        buffer.m_Indices = UINT32_MAX;
+        buffer.m_DataCount = 0;
+        return *this;
+    }
+
+    void VertexBuffer::Bind()
+    {
+        glBindVertexArray(m_Arrays);
+    }
+
+    void VertexBuffer::Unbind()
+    {
+        glBindVertexArray(0);
+    }
+
+    void VertexBuffer::Destroy()
+    {
         if (m_Arrays != UINT32_MAX)
         {
             glDeleteVertexArrays(1, &m_Arrays);
@@ -39,16 +79,6 @@ namespace Cm
         }
     }
 
-    void VertexBuffer::Bind()
-    {
-        glBindVertexArray(m_Arrays);
-    }
-
-    void VertexBuffer::Unbind()
-    {
-        glBindVertexArray(0);
-    }
-
     void VertexBuffer::PushData(size_t vertexCount, const Vertex* vertices)
     {
         glBindVertexArray(m_Arrays);
@@ -61,7 +91,7 @@ namespace Cm
     void VertexBuffer::PushData(size_t indicesCount, const unsigned int* indicess)
     {
         glBindVertexArray(m_Arrays);
-        if (m_Indices != UINT32_MAX)
+        if (m_Indices == UINT32_MAX)
             glGenBuffers(1, &m_Indices);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Indices);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indicesCount, indicess, m_Type == Static ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);

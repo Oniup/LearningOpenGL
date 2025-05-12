@@ -23,6 +23,7 @@ namespace Cm
             return m_GpuId;
         }
 
+        void Bind(unsigned int index);
         void Destroy();
 
     private:

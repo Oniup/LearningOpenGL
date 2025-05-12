@@ -2,58 +2,55 @@
 
 namespace Cm
 {
-    Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, const std::vector<TextureEntry>& textures, VertexBuffer::Type vertexDataType)
-        : m_VertexBuffer(vertexDataType), m_Textures(textures)
+    Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<MeshTexture>& textures)
+        : m_Textures(textures)
     {
-        m_VertexBuffer.PushData(vertices.size(), vertices.data());
-        m_VertexBuffer.PushData(indices.size(), indices.data());
-    }
-
-    Mesh::~Mesh()
-    {
+        m_Vertices.PushData(vertices);
+        m_Vertices.PushData(indices);
     }
 
     void Mesh::Draw(Shader& shader)
     {
-        size_t diffuseCount = 1;
-        size_t specularCount = 1;
-        size_t emissionCount = 1;
-        for (size_t i = 0; i < m_Textures.size(); ++i)
+        // Material Setup
+        unsigned int diffuseCount = 0;
+        unsigned int specularCount = 0;
+        unsigned int emissionCount = 0;
+        for (unsigned int i = 0; i < m_Textures.size(); ++i)
         {
-            glActiveTexture(GL_TEXTURE0 + i);
-            constexpr size_t nameBufMaxCount = 128;
-            char locationName[nameBufMaxCount];
+            MeshTexture& texture = m_Textures[i];
+            constexpr unsigned int uniformNameMaxSize = 128;
+            char uniformName[uniformNameMaxSize];
 
-            auto&[texture, textureType] = m_Textures[i];
-            switch (textureType)
+            switch (texture.Type)
             {
-            case TextureType::Phong_Diffuse:
-                snprintf(locationName, nameBufMaxCount, "u_Material.Diffuse[%zu]", diffuseCount++);
+            case aiTextureType_DIFFUSE:
+                snprintf(uniformName, uniformNameMaxSize, "u_Material.DiffuseMaps[%u]", diffuseCount);
+                ++diffuseCount;
                 break;
-            case TextureType::Phong_Specular:
-                snprintf(locationName, nameBufMaxCount, "u_Material.Specular[%zu]", specularCount++);
+            case aiTextureType_SPECULAR:
+                snprintf(uniformName, uniformNameMaxSize, "u_Material.SpecularMaps[%u]", specularCount);
+                ++specularCount;
                 break;
-            case TextureType::Phong_Emission:
-                snprintf(locationName, nameBufMaxCount, "u_Material.Emission[%zu]", emissionCount++);
+            case aiTextureType_EMISSIVE:
+                snprintf(uniformName, uniformNameMaxSize, "u_Material.EmissionMaps[%u]", emissionCount);
+                ++emissionCount;
                 break;
+            default:
+                std::cerr << "Invalid texture type\n";
+                std::abort();
             }
-
-            shader.UniformI(locationName, i);
-            glBindTexture(GL_TEXTURE_2D, texture->GetGpuId());
+            shader.UniformI(uniformName, i);
+            texture.Texture->Bind(i);
         }
-        shader.UniformI("u_Material.DiffuseMapCount", diffuseCount);
-        shader.UniformI("u_Material.SpecularMapCount", specularCount);
-        shader.UniformI("u_Material.EmissionMapCount", emissionCount);
-        m_VertexBuffer.Draw(Cm::DrawMode::Triangles);
+        shader.UniformU("u_Material.DiffuseCount", diffuseCount);
+        shader.UniformU("u_Material.SpecularCount", specularCount);
+        shader.UniformU("u_Material.EmissionCount", emissionCount);
+        m_Vertices.Draw(Cm::DrawMode::Triangles);
     }
 
     Model::Model(const std::string_view& path)
     {
         LoadModel(path);
-    }
-
-    Model::~Model()
-    {
     }
 
     void Model::Draw(Shader& shader)
@@ -65,109 +62,81 @@ namespace Cm
     void Model::LoadModel(const std::string_view& path)
     {
         Assimp::Importer importer;
-        int processSteps = aiProcess_Triangulate | aiProcess_FlipUVs;
-        const aiScene* scene = importer.ReadFile(path.data(), processSteps);
+        const aiScene* scene = importer.ReadFile(path.data(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_OptimizeMeshes);
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
         {
             std::cerr << "Assimp Error: " << importer.GetErrorString() << "\n";
             std::abort();
         }
-        std::string directory(path.substr(0, path.find_last_of('/')));
+        std::string directory(path.substr(0, path.find_last_of('/') + 1));
         ProcessNode(directory, scene->mRootNode, scene);
     }
 
     void Model::ProcessNode(const std::string& directory, const aiNode* node, const aiScene* scene)
     {
-        // process all the nodes meshes (if there are any)
         for (unsigned int i = 0; i < node->mNumMeshes; ++i)
         {
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-            ProcessMesh(directory, mesh, scene);
+            m_Meshes.push_back(ProcessMesh(directory, mesh, scene));
         }
-        // process all the other nodes children nodes
         for (unsigned int i = 0; i < node->mNumChildren; ++i)
             ProcessNode(directory, node->mChildren[i], scene);
     }
 
-    void Model::ProcessMesh(const std::string& directory, const aiMesh* mesh, const aiScene* scene)
+    Mesh Model::ProcessMesh(const std::string& directory, const aiMesh* mesh, const aiScene* scene)
     {
-        std::vector<Vertex> vertices(mesh->mNumVertices);
-        std::vector<unsigned int> indices(mesh->mNumFaces);
-
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
+        vertices.reserve(mesh->mNumVertices);
+        indices.reserve(mesh->mNumFaces * 3);
         // Vertices
         for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
         {
-            Vertex vertex;
-            vertex.Position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-            vertex.Normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-            if (mesh->mTextureCoords[0])
-                vertex.UV = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
-            else
-                vertex.UV = glm::vec3(0.0f);
-            vertices.push_back(vertex);
+            vertices.push_back(Vertex{
+                glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z),
+                glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z),
+                glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y),
+            });
         }
         // Indices
         for (unsigned int i = 0; i < mesh->mNumFaces; ++i)
         {
-            const aiFace& face = mesh->mFaces[i];
+            aiFace face = mesh->mFaces[i];
             for (unsigned int j = 0; j < face.mNumIndices; ++j)
                 indices.push_back(face.mIndices[j]);
         }
-        // Material
+        // Load Material
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        std::vector<Mesh::TextureEntry> meshTextures;
-        LoadMaterialTextures(directory, material, aiTextureType_DIFFUSE, meshTextures);
-        LoadMaterialTextures(directory, material, aiTextureType_SPECULAR, meshTextures);
-
-        // Create mesh
-        m_Meshes.push_back(Mesh(vertices, indices, meshTextures));
+        std::vector<MeshTexture> meshTextures;
+        LoadMaterialTextures(meshTextures, directory, material, aiTextureType_DIFFUSE);
+        LoadMaterialTextures(meshTextures, directory, material, aiTextureType_SPECULAR);
+        return Mesh(vertices, indices, meshTextures);
     }
 
-    void Model::LoadMaterialTextures(const std::string& directory, const aiMaterial* mat, aiTextureType type,  std::vector<Mesh::TextureEntry>& out)
+    void Model::LoadMaterialTextures(std::vector<MeshTexture>& meshTextures, const std::string& directory, aiMaterial* material, aiTextureType type)
     {
-        Mesh::TextureType texType;
-        switch (type)
-        {
-        case aiTextureType_DIFFUSE:
-            texType = Mesh::TextureType::Phong_Diffuse;
-            break;
-        case aiTextureType_SPECULAR:
-            texType = Mesh::TextureType::Phong_Specular;
-            break;
-        case aiTextureType_EMISSIVE:
-            texType = Mesh::TextureType::Phong_Emission;
-            break;
-        default:
-            std::cerr << "Not supported texture type";
-            std::abort();
-        }
-        for (unsigned int i = 0; i < mat->GetTextureCount(type); ++i)
+        unsigned int count = material->GetTextureCount(type);
+        for (unsigned int i = 0; i < count; ++i)
         {
             aiString str;
-            mat->GetTexture(type, i, &str);
+            material->GetTexture(type, i, &str);
             bool skip = false;
-            Texture* texture = nullptr;
-            for (LoadedTexture& loaded : m_LoadedTextures)
+            for (unsigned int j = 0; j < m_LoadedTextures.size(); ++j)
             {
-                if (strncmp(loaded.Name.data(), str.C_Str(), loaded.Name.size()) == 0)
+                // Texture already loaded
+                if (strncmp(str.C_Str(), m_LoadedTextures[j].Name.c_str(), str.length) == 0)
                 {
-                    texture = &loaded.Texture;
+                    meshTextures.push_back(MeshTexture{&m_LoadedTextures[i].Texture, type});
                     skip = true;
                     break;
                 }
             }
+            // Texture isn't already loaded
             if (!skip)
             {
-                constexpr size_t pathMaxCount = 128;
-                char path[pathMaxCount];
-                snprintf(path, pathMaxCount, "%s/%s", directory.c_str(), str.C_Str());
-                m_LoadedTextures.push_back(LoadedTexture{
-                    Texture(path, TextureFilter::Linear),
-                    str.C_Str(),
-                });
-                texture = &m_LoadedTextures.back().Texture;
+                m_LoadedTextures.push_back(LoadedTexture{Texture(directory + str.C_Str(), TextureFilter::Linear), str.C_Str()});
+                meshTextures.push_back(MeshTexture{&m_LoadedTextures.back().Texture, type});
             }
-            out.push_back(Mesh::TextureEntry{texture, texType});
         }
     }
 }
