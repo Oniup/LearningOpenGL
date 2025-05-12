@@ -5,7 +5,7 @@
 namespace Cm
 {
     VertexBuffer::VertexBuffer(Type type)
-        : m_Type(type), m_Indices(UINT32_MAX), m_DataCount(0)
+        : m_Type(type), m_Indices(std::numeric_limits<unsigned int>::max()), m_DataCount(0)
     {
         glGenVertexArrays(1, &m_Arrays);
         glGenBuffers(1, &m_Vertices);
@@ -30,9 +30,9 @@ namespace Cm
     VertexBuffer::VertexBuffer(VertexBuffer&& buffer)
         : m_Type(buffer.m_Type), m_Arrays(buffer.m_Arrays), m_Vertices(buffer.m_Vertices), m_Indices(buffer.m_Indices), m_DataCount(buffer.m_DataCount)
     {
-        buffer.m_Arrays = UINT32_MAX;
-        buffer.m_Vertices = UINT32_MAX;
-        buffer.m_Indices = UINT32_MAX;
+        buffer.m_Arrays = std::numeric_limits<unsigned int>::max();
+        buffer.m_Vertices = std::numeric_limits<unsigned int>::max();
+        buffer.m_Indices = std::numeric_limits<unsigned int>::max();
         buffer.m_DataCount = 0;
     }
 
@@ -45,9 +45,9 @@ namespace Cm
         m_Indices = buffer.m_Indices;
         m_DataCount = buffer.m_DataCount;
 
-        buffer.m_Arrays = UINT32_MAX;
-        buffer.m_Vertices = UINT32_MAX;
-        buffer.m_Indices = UINT32_MAX;
+        buffer.m_Arrays = std::numeric_limits<unsigned int>::max();
+        buffer.m_Vertices = std::numeric_limits<unsigned int>::max();
+        buffer.m_Indices = std::numeric_limits<unsigned int>::max();
         buffer.m_DataCount = 0;
         return *this;
     }
@@ -64,17 +64,17 @@ namespace Cm
 
     void VertexBuffer::Destroy()
     {
-        if (m_Arrays != UINT32_MAX)
+        if (m_Arrays != std::numeric_limits<unsigned int>::max())
         {
             glDeleteVertexArrays(1, &m_Arrays);
             glDeleteBuffers(1, &m_Vertices);
-            if (m_Indices != UINT32_MAX)
+            if (m_Indices != std::numeric_limits<unsigned int>::max())
             {
                 glDeleteBuffers(1, &m_Indices);
             }
-            m_Arrays = UINT32_MAX;
-            m_Vertices = UINT32_MAX;
-            m_Indices = UINT32_MAX;
+            m_Arrays = std::numeric_limits<unsigned int>::max();
+            m_Vertices = std::numeric_limits<unsigned int>::max();
+            m_Indices = std::numeric_limits<unsigned int>::max();
             m_DataCount = 0;
         }
     }
@@ -84,14 +84,14 @@ namespace Cm
         glBindVertexArray(m_Arrays);
         glBindBuffer(GL_ARRAY_BUFFER, m_Vertices);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexCount, vertices, m_Type == Static ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
-        if (m_Indices == UINT32_MAX)
+        if (m_Indices == std::numeric_limits<unsigned int>::max())
             m_DataCount = vertexCount;
     }
 
     void VertexBuffer::PushData(size_t indicesCount, const unsigned int* indicess)
     {
         glBindVertexArray(m_Arrays);
-        if (m_Indices == UINT32_MAX)
+        if (m_Indices == std::numeric_limits<unsigned int>::max())
             glGenBuffers(1, &m_Indices);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Indices);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indicesCount, indicess, m_Type == Static ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
@@ -103,15 +103,15 @@ namespace Cm
         PushData(vertices.size(), vertices.data());
     }
 
-    void VertexBuffer::PushData(const std::vector<unsigned int>& indicess)
+    void VertexBuffer::PushData(const std::vector<unsigned int>& indices)
     {
-        PushData(indicess.size(), indicess.data());
+        PushData(indices.size(), indices.data());
     }
 
     void VertexBuffer::PushData(size_t offset, size_t vertexCount, const Vertex* vertices)
     {
         glBindVertexArray(m_Arrays);
-        if (m_Vertices != UINT32_MAX)
+        if (m_Vertices != std::numeric_limits<unsigned int>::max())
             PushData(offset + vertexCount, (Vertex*)nullptr);
         glBindBuffer(GL_ARRAY_BUFFER, m_Vertices);
         glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vertex) * offset, sizeof(Vertex) * vertexCount, vertices);
@@ -120,7 +120,7 @@ namespace Cm
     void VertexBuffer::PushData(size_t offset, size_t indicesCount, const unsigned int* indicess)
     {
         glBindVertexArray(m_Arrays);
-        if (m_Indices != UINT32_MAX)
+        if (m_Indices != std::numeric_limits<unsigned int>::max())
             PushData(offset + indicesCount, (unsigned int*)nullptr);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Indices);
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * offset, sizeof(unsigned int) * indicesCount, indicess);
@@ -129,7 +129,7 @@ namespace Cm
     void VertexBuffer::Draw(DrawMode mode)
     {
         glBindVertexArray(m_Arrays);
-        if (m_Indices != UINT32_MAX)
+        if (m_Indices != std::numeric_limits<unsigned int>::max())
             glDrawElements((GLenum)mode, m_DataCount, GL_UNSIGNED_INT, (void*)0);
         else
             glDrawArrays((GLenum)mode, 0, m_DataCount);

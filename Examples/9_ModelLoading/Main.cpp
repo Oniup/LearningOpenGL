@@ -1,15 +1,20 @@
 #include <glad/glad.h>
+#include <imgui/imgui.h>
 
 #include "Common/Camera.h"
 #include "Common/Context.h"
+#include "Common/Lights.h"
 #include "Common/Mesh.h"
 #include "Common/Shader.h"
 
 int main(int argc, char** argv)
 {
     Cm::Context context(PROJECT_NAME, 600, 600);
+    context.EnableImGui();
     context.SetClearOptions(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
+
+    Cm::LightsManager lights;
 
     Cm::Shader shader({PROJECT_DIR "/Model.vert", PROJECT_DIR "/Model.frag"});
     Cm::Model model(RESOURCE_DIR "/Meshes/backpack/backpack.obj");
@@ -27,6 +32,28 @@ int main(int argc, char** argv)
 
     while (context.BeginFrame())
     {
+        if (ImGui::Begin("Options"))
+        {
+            ImGui::ColorEdit3("Clear Color", &context.GetClearColor()[0]);
+            if (ImGui::CollapsingHeader("Camera"))
+            {
+                float lastFov = camera.Fov;
+                ImGui::DragFloat("FOV", &camera.Fov);
+                ImGui::DragFloat("Mouse Sensitivity", &camera.MouseSensitivity, 0.01f);
+
+                // camera.Fov = std::clamp(camera.Fov, 5.0f, 90.0f);
+                camera.MouseSensitivity = std::clamp(camera.MouseSensitivity, 0.0f, 2.0f);
+                if (lastFov != camera.Fov)
+                {
+                    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+                    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &camera.GetProjectionMatrix(context)[0][0]);
+                    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+                }
+            }
+            lights.ImGuiEdit();
+            ImGui::End();
+        }
+
         glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
         glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), &camera.GetViewMatrix()[0][0]);
         glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, sizeof(glm::mat4) * 2);

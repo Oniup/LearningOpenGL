@@ -38,7 +38,7 @@ namespace Cm
         void PushData(size_t vertexCount, const Vertex* indices);
         void PushData(size_t indicesCount, const unsigned int* indices);
         void PushData(const std::vector<Vertex>& vertices);
-        void PushData(const std::vector<unsigned int>& elements);
+        void PushData(const std::vector<unsigned int>& indices);
 
         void PushData(size_t offset, size_t vertexCount, const Vertex* vertices);
         void PushData(size_t offset, size_t indicesCount, const unsigned int* indices);

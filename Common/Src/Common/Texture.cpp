@@ -6,7 +6,7 @@
 namespace Cm
 {
     Texture::Texture()
-        : m_GpuId(UINT32_MAX)
+        : m_GpuId(std::numeric_limits<unsigned int>::max())
     {
     }
 
@@ -65,14 +65,14 @@ namespace Cm
     Texture::Texture(Texture&& texture)
         : m_GpuId(texture.m_GpuId)
     {
-        texture.m_GpuId = UINT32_MAX;
+        texture.m_GpuId = std::numeric_limits<unsigned int>::max();
     }
 
     Texture& Texture::operator=(Texture&& texture)
     {
         Destroy();
         m_GpuId = texture.m_GpuId;
-        texture.m_GpuId = UINT32_MAX;
+        texture.m_GpuId = std::numeric_limits<unsigned int>::max();
         return *this;
     }
 
@@ -84,10 +84,10 @@ namespace Cm
 
     void Texture::Destroy()
     {
-        if (m_GpuId != UINT32_MAX)
+        if (m_GpuId != std::numeric_limits<unsigned int>::max())
         {
             glDeleteTextures(1, &m_GpuId);
-            m_GpuId = UINT32_MAX;
+            m_GpuId = std::numeric_limits<unsigned int>::max();
         }
     }
 }

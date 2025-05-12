@@ -82,6 +82,7 @@ namespace Cm
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         }
         m_Window.SwapBuffers();
+        glViewport(0, 0, m_Window.GetWidth(), m_Window.GetHeight());
     }
 
     void Context::SetTheme()

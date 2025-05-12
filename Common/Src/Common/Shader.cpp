@@ -54,10 +54,10 @@ namespace Cm
 
     Shader::~Shader()
     {
-        if (m_GpuId != UINT32_MAX)
+        if (m_GpuId != std::numeric_limits<unsigned int>::max())
         {
             glDeleteProgram(m_GpuId);
-            m_GpuId = UINT32_MAX;
+            m_GpuId = std::numeric_limits<unsigned int>::max();
         }
     }
 
