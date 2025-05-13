@@ -1,5 +1,6 @@
 #include "Common/Lights.h"
 #include <imgui/imgui.h>
+#include <algorithm>
 
 namespace Cm
 {
@@ -76,6 +77,7 @@ namespace Cm
 
         // Count buffers
         unsigned int countOffset = spotLightOffset + sizeof(SpotLight) * MaxSpotLightCount;
+        //unsigned int countOffset = directionalLightsOffset + sizeof(DirectionalLight) * MaxDirectionalLightCount;
         glBufferSubData(GL_UNIFORM_BUFFER, countOffset + 0 * sizeof(unsigned int), sizeof(unsigned int), &m_PointLightsCount);
         glBufferSubData(GL_UNIFORM_BUFFER, countOffset + 1 * sizeof(unsigned int), sizeof(unsigned int), &m_DirectionalLightsCount);
         glBufferSubData(GL_UNIFORM_BUFFER, countOffset + 2 * sizeof(unsigned int), sizeof(unsigned int), &m_SpotLightsCount);
@@ -141,6 +143,7 @@ namespace Cm
                     PointLight& light = m_PointLights[i];
                     valChanged += ImGui::DragFloat3("Position", &light.Position[0], m_ImGuiDragSpeed);
                     valChanged += ColorEdit(light.Color);
+                    valChanged += AttenuationEdit(light.Attenuation);
                     ImGui::TreePop();
                 }
                 ImGui::PopID();
@@ -175,6 +178,7 @@ namespace Cm
                     float outerCutOff = glm::degrees(light.OuterCutOff);
                     valChanged += ImGui::DragFloat("Cut Off", &cutOff, 0.5f, 0.1f, outerCutOff);
                     valChanged += ImGui::DragFloat("Outer Cut Off", &outerCutOff, 0.5f, 0.1f, 100.0f);
+                    cutOff = std::clamp(cutOff, 0.1f, outerCutOff);
                     light.OuterCutOff = glm::radians(outerCutOff);
                     light.CutOff = glm::radians(cutOff);
                     ImGui::TreePop();

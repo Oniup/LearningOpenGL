@@ -46,8 +46,8 @@ namespace Cm
         }
         else if (setSize)
         {
-            width = vidMode->width / 2;
-            height = vidMode->height / 2;
+            width = vidMode->width - vidMode->width / 3;
+            height = vidMode->height - vidMode->height / 3;
         }
 
         m_Window = glfwCreateWindow(width, height, title.data(), flags & WindowFlags_ModeFullscreen ? monitor : nullptr, nullptr);

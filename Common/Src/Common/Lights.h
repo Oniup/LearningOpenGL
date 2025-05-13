@@ -7,9 +7,9 @@ namespace Cm
     struct LightColor
     {
         alignas(16) glm::vec3 Base = glm::vec3(1.0f);
-        alignas(16) glm::vec3 Ambient = glm::vec3(0.0f);
+        alignas(16) glm::vec3 Ambient = glm::vec3(0.1f);
         alignas(16) glm::vec3 Specular = glm::vec3(1.0f);
-        float Intensity;
+        float Intensity = 1.0f;
     };
 
     struct LightAttenuation
@@ -37,7 +37,7 @@ namespace Cm
         LightColor Color;
     };
 
-    struct SpotLight
+    struct alignas(16) SpotLight
     {
         alignas(16) glm::vec3 Position = glm::vec3(0.0f);
         alignas(16) glm::vec3 Direction = glm::vec3(0.0f, -1.0f, 0.0f);
@@ -61,6 +61,36 @@ namespace Cm
         void ImGuiEdit();
         void Bind(unsigned int uboBindingIndex);
         void UpdateGpuBuffer();
+
+        const PointLight* GetPointLights() const
+        {
+            return m_PointLights;
+        }
+
+        const DirectionalLight* GetDirectionalLights() const
+        {
+            return m_DirectionalLights;
+        }
+
+        const SpotLight* GetSpotLights() const
+        {
+            return m_SpotLights;
+        }
+
+        unsigned int GetPointLightCount() const
+        {
+            return m_PointLightsCount;
+        }
+
+        unsigned int GetDirectionalLightCount() const
+        {
+            return m_DirectionalLightsCount;
+        }
+
+        unsigned int GetSpotLightsCount() const
+        {
+            return m_SpotLightsCount;
+        }
 
     private:
         void CreateGpuBuffer();
