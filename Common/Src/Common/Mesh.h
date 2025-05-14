@@ -21,7 +21,7 @@ namespace Cm
     {
     public:
         Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<MeshTexture>& textures);
-        void Draw(Shader& shader);
+        void Draw(Shader& shader) const;
 
     private:
         std::vector<MeshTexture> m_Textures;
@@ -38,7 +38,7 @@ namespace Cm
 
     public:
         Model(const std::string_view& path);
-        void Draw(Shader& shader);
+        void Draw(Shader& shader) const;
 
     private:
         void LoadModel(const std::string_view& path);

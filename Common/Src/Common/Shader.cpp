@@ -2,57 +2,45 @@
 
 namespace Cm
 {
+    constexpr unsigned int g_InfoLogLength = 512;
+
+    Shader::Shader()
+        : m_GpuId(std::numeric_limits<unsigned int>::max())
+    {
+    }
+
     Shader::Shader(const std::vector<std::string_view>& paths)
     {
-        constexpr int infoLogLength = 512;
-
         std::vector<std::pair<ShaderStage, std::string>> sources;
         for (const std::string_view& path : paths)
             sources.push_back(ReadSource(path));
-
-        std::vector<unsigned int> shaders;
-        for (int i = 0; i < sources.size(); ++i)
-        {
-            unsigned int glType = ShaderStageToOpenGL(sources[i].first);
-            const char* src = sources[i].second.c_str();
-
-            unsigned int shader = glCreateShader(glType);
-            glShaderSource(shader, 1, &src, nullptr);
-            glCompileShader(shader);
-
-            int success;
-            glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-            if (!success)
-            {
-                char infoLog[infoLogLength];
-                glGetShaderInfoLog(shader, infoLogLength, nullptr, infoLog);
-                std::cerr << "Failed to compile shader at \"" << paths[i] << "\":\n" << infoLog << "\n";
-                std::abort();
-            }
-            shaders.push_back(shader);
-        }
-
-        unsigned int program = glCreateProgram();
-        for (unsigned int shader : shaders)
-            glAttachShader(program, shader);
-        glLinkProgram(program);
-
-        int success;
-        glGetProgramiv(program, GL_LINK_STATUS, &success);
-        if (!success)
-        {
-            char infoLog[infoLogLength];
-            glGetProgramInfoLog(program, infoLogLength, nullptr, infoLog);
-            std::cerr << "Failed to link shader program's shaders: " << infoLog << "\n";
-            std::abort();
-        }
-
-        for (unsigned int shader : shaders)
-            glDeleteShader(shader);
-        m_GpuId = program;
+        Create(sources);
     }
 
     Shader::~Shader()
+    {
+        Destroy();
+    }
+
+    Shader::Shader(Shader&& shader)
+        : m_GpuId(shader.m_GpuId)
+    {
+        shader.m_GpuId = std::numeric_limits<unsigned int>::max();
+    }
+
+    Shader& Shader::operator=(Shader&& shader)
+    {
+        m_GpuId = shader.m_GpuId;
+        shader.m_GpuId = std::numeric_limits<unsigned int>::max();
+        return *this;
+    }
+
+    void Shader::Bind()
+    {
+        glUseProgram(m_GpuId);
+    }
+
+    void Shader::Destroy()
     {
         if (m_GpuId != std::numeric_limits<unsigned int>::max())
         {
@@ -61,9 +49,22 @@ namespace Cm
         }
     }
 
-    void Shader::Bind()
+    void Shader::Create(const std::vector<std::pair<ShaderStage, std::string>>& sources)
     {
-        glUseProgram(m_GpuId);
+        Destroy();
+        std::vector<unsigned int> shaders;
+        for (auto&[stage, source] : sources)
+            shaders.push_back(CreateShaderInstance(stage, source));
+        CreateProgram(shaders);
+    }
+
+    void Shader::Create(const std::vector<std::pair<ShaderStage, std::string_view>>& sources)
+    {
+        Destroy();
+        std::vector<unsigned int> shaders;
+        for (auto&[stage, source] : sources)
+            shaders.push_back(CreateShaderInstance(stage, source));
+        CreateProgram(shaders);
     }
 
     void Shader::UniformI(const std::string_view& location, int val)
@@ -197,5 +198,63 @@ namespace Cm
         default:
             std::abort();
         }
+    }
+
+    std::string_view Shader::ShaderStageToString(ShaderStage stage)
+    {
+        switch (stage)
+        {
+        case ShaderStage::Vertex:
+            return "Vertex";
+        case ShaderStage::Fragment:
+            return "Fragment";
+        case ShaderStage::Geometry:
+            return "Geometry";
+        case ShaderStage::Compute:
+            return "Compute";
+        default:
+            return "Invalid";
+        }
+    }
+
+    unsigned int Shader::CreateShaderInstance(ShaderStage stage, const std::string_view& source)
+    {
+        unsigned int glType = ShaderStageToOpenGL(stage);
+        const char* src = source.data();
+        unsigned int shader = glCreateShader(glType);
+        glShaderSource(shader, 1, &src, nullptr);
+        glCompileShader(shader);
+
+        int success;
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+        if (!success)
+        {
+            char infoLog[g_InfoLogLength];
+            glGetShaderInfoLog(shader, g_InfoLogLength, nullptr, infoLog);
+            std::cerr << "Failed to compile " << ShaderStageToString(stage) << " Shader:\n" << infoLog << "\n";
+            std::abort();
+        }
+        return shader;
+    }
+
+    void Shader::CreateProgram(const std::vector<unsigned int>& shaders)
+    {
+        unsigned int program = glCreateProgram();
+        for (unsigned int shader : shaders)
+            glAttachShader(program, shader);
+        glLinkProgram(program);
+
+        int success;
+        glGetProgramiv(program, GL_LINK_STATUS, &success);
+        if (!success)
+        {
+            char infoLog[g_InfoLogLength];
+            glGetProgramInfoLog(program, g_InfoLogLength, nullptr, infoLog);
+            std::cerr << "Failed to link shader program's shaders: " << infoLog << "\n";
+            std::abort();
+        }
+        for (unsigned int shader : shaders)
+            glDeleteShader(shader);
+        m_GpuId = program;
     }
 }

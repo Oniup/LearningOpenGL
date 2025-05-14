@@ -43,7 +43,7 @@ namespace Cm
         void PushData(size_t offset, size_t vertexCount, const Vertex* vertices);
         void PushData(size_t offset, size_t indicesCount, const unsigned int* indices);
 
-        void Draw(DrawMode mode);
+        void Draw(DrawMode mode) const;
 
     private:
         Type m_Type;

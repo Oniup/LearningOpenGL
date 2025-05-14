@@ -27,8 +27,12 @@ namespace Cm
     class Shader
     {
     public:
+        Shader();
         Shader(const std::vector<std::string_view>& paths);
         ~Shader();
+
+        Shader(Shader&& shader);
+        Shader& operator=(Shader&& shader);
 
         unsigned int GetGpuId() const
         {
@@ -36,6 +40,9 @@ namespace Cm
         }
 
         void Bind();
+        void Destroy();
+        void Create(const std::vector<std::pair<ShaderStage, std::string>>& sources);
+        void Create(const std::vector<std::pair<ShaderStage, std::string_view>>& sources);
 
         void UniformI(const std::string_view& location, int val);
         void UniformI2(const std::string_view& location, const glm::ivec2& vec);
@@ -59,8 +66,11 @@ namespace Cm
     private:
         std::pair<ShaderStage, std::string> ReadSource(const std::string_view& path);
         int ShaderStageToOpenGL(ShaderStage stage) const;
+        std::string_view ShaderStageToString(ShaderStage stage);
+        unsigned int CreateShaderInstance(ShaderStage stage, const std::string_view& source);
+        void CreateProgram(const std::vector<unsigned int>& shaders);
 
     private:
-        unsigned int m_GpuId = -1;
+        unsigned int m_GpuId;
     };
 }

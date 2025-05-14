@@ -21,9 +21,10 @@ out VS_VERTEX
 
 void main()
 {
-    gl_Position = u_Projection * u_View * u_Model * vec4(a_Position, 1.0);
+    vec4 vertexPosition = u_Model * vec4(a_Position, 1.0);
+    gl_Position = u_Projection * u_View * vertexPosition;
 
-    Vertex.Position = vec3(u_Model * vec4(a_Position, 1.0));
+    Vertex.Position = vertexPosition.xyz;
     Vertex.Normal = normalize(mat3(transpose(inverse(u_Model))) * a_Normal);
     Vertex.UV = a_UV;
 }

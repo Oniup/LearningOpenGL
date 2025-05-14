@@ -2,14 +2,20 @@
 
 #include <glm/glm.hpp>
 
+#include "Common/Shader.h"
+#include "Common/Mesh.h"
+
 namespace Cm
 {
     struct LightColor
     {
-        alignas(16) glm::vec3 Base = glm::vec3(1.0f);
-        alignas(16) glm::vec3 Ambient = glm::vec3(0.1f);
-        alignas(16) glm::vec3 Specular = glm::vec3(1.0f);
-        float Intensity = 1.0f;
+        alignas(16) glm::vec3 Base;
+        alignas(16) glm::vec3 Ambient;
+        alignas(16) glm::vec3 Specular;
+        float Intensity;
+
+	public:
+		void SetToDefault();
     };
 
     struct LightAttenuation
@@ -18,33 +24,33 @@ namespace Cm
         float Quadratic;
 
     public:
-        LightAttenuation();
+		void SetToDefault();
 
-        void SetDistance(float distance);
         float GetDistance() const;
+        void SetDistance(float distance);
     };
 
     struct alignas(16) PointLight
     {
-        alignas(16) glm::vec3 Position = glm::vec3(0.0f);
+        alignas(16) glm::vec3 Position;
         LightColor Color;
         LightAttenuation Attenuation;
     };
 
     struct alignas(16) DirectionalLight
     {
-        alignas(16) glm::vec3 Direction = glm::vec3(0.2f, -1.0f, 0.6f);
+        alignas(16) glm::vec3 Direction;
         LightColor Color;
     };
 
     struct alignas(16) SpotLight
     {
-        alignas(16) glm::vec3 Position = glm::vec3(0.0f);
-        alignas(16) glm::vec3 Direction = glm::vec3(0.0f, -1.0f, 0.0f);
+        alignas(16) glm::vec3 Position;
+        alignas(16) glm::vec3 Direction;
         LightColor Color;
         LightAttenuation Attenuation;
-        float CutOff = glm::radians(12.0f);
-        float OuterCutOff = glm::radians(17.0f);
+        float CutOff;
+		float OuterCutOff;
     };
 
     class LightsManager
@@ -57,10 +63,6 @@ namespace Cm
     public:
         LightsManager();
         ~LightsManager();
-
-        void ImGuiEdit();
-        void Bind(unsigned int uboBindingIndex);
-        void UpdateGpuBuffer();
 
         const PointLight* GetPointLights() const
         {
@@ -91,6 +93,21 @@ namespace Cm
         {
             return m_SpotLightsCount;
         }
+
+        bool ImGuiEdit();
+        void Bind(unsigned int uboBindingIndex);
+        void UpdateGpuBuffer();
+
+		static Shader CreateLightObjectShader();
+		void DrawLightObjects(Shader& shader, const Model& pointLight, const Model& spotLight);
+
+		bool AddPointLight();
+		bool AddDirectionalLight();
+		bool AddSpotLight();
+
+		bool RemovePointLight(unsigned int index);
+		bool RemoveDirectionalLight(unsigned int index);
+		bool RemoveSpotLight(unsigned int index);
 
     private:
         void CreateGpuBuffer();

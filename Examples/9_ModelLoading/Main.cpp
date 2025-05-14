@@ -19,7 +19,7 @@ int main(int argc, char** argv)
     lights.UpdateGpuBuffer();
 
     Cm::Shader shader({ PROJECT_DIR "/Model.frag", PROJECT_DIR "/Model.vert" });
-    Cm::Shader lightShader({ PROJECT_DIR "/Light.frag", PROJECT_DIR "/Model.vert" });
+    Cm::Shader lightShader(Cm::LightsManager::CreateLightObjectShader());
     Cm::Model model(RESOURCE_DIR "/Meshes/backpack/backpack.obj");
     Cm::Model sphere(RESOURCE_DIR "/Meshes/Sphere/Sphere.obj");
 
@@ -54,7 +54,8 @@ int main(int argc, char** argv)
                     glBindBuffer(GL_UNIFORM_BUFFER, 0);
                 }
             }
-            lights.ImGuiEdit();
+            if (lights.ImGuiEdit())
+                lights.UpdateGpuBuffer();
             ImGui::End();
         }
 
@@ -71,26 +72,7 @@ int main(int argc, char** argv)
         shader.UniformF3("u_ViewPosition", camera.Position);
         model.Draw(shader);
 
-        lightShader.Bind();
-        for (unsigned int i = 0; i < lights.GetPointLightCount(); i++)
-        {
-            Cm::Transform transform;
-            transform.Scale = glm::vec3(0.2f);
-            transform.Position = lights.GetPointLights()[i].Position;
-            lightShader.UniformMat4("u_Model", transform.GetModel());
-            lightShader.UniformF3("u_LightBaseColor", lights.GetPointLights()[i].Color.Base);
-            sphere.Draw(lightShader);
-        }
-        for (unsigned int i = 0; i < lights.GetSpotLightsCount(); i++)
-        {
-            Cm::Transform transform;
-            transform.Scale = glm::vec3(0.2f);
-            transform.Position = lights.GetSpotLights()[i].Position;
-            lightShader.UniformMat4("u_Model", transform.GetModel());
-            lightShader.UniformF3("u_LightBaseColor", lights.GetSpotLights()[i].Color.Base);
-            sphere.Draw(lightShader);
-        }
-
+        lights.DrawLightObjects(lightShader, sphere, sphere);
         context.EndFrame();
     }
     return 0;

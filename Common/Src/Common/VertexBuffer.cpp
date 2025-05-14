@@ -126,7 +126,7 @@ namespace Cm
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * offset, sizeof(unsigned int) * indicesCount, indicess);
     }
 
-    void VertexBuffer::Draw(DrawMode mode)
+    void VertexBuffer::Draw(DrawMode mode) const
     {
         glBindVertexArray(m_Arrays);
         if (m_Indices != std::numeric_limits<unsigned int>::max())

@@ -9,7 +9,7 @@ namespace Cm
         m_Vertices.PushData(indices);
     }
 
-    void Mesh::Draw(Shader& shader)
+    void Mesh::Draw(Shader& shader) const
     {
         // Material Setup
         unsigned int diffuseCount = 0;
@@ -17,7 +17,7 @@ namespace Cm
         unsigned int emissionCount = 0;
         for (unsigned int i = 0; i < m_Textures.size(); ++i)
         {
-            MeshTexture& texture = m_Textures[i];
+            const MeshTexture& texture = m_Textures[i];
             constexpr unsigned int uniformNameMaxSize = 128;
             char uniformName[uniformNameMaxSize];
 
@@ -53,9 +53,9 @@ namespace Cm
         LoadModel(path);
     }
 
-    void Model::Draw(Shader& shader)
+    void Model::Draw(Shader& shader) const
     {
-        for (Mesh& mesh : m_Meshes)
+        for (const Mesh& mesh : m_Meshes)
             mesh.Draw(shader);
     }
 
