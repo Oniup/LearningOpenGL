@@ -64,14 +64,29 @@ namespace Cm
         LightsManager();
         ~LightsManager();
 
+        PointLight* GetPointLights()
+        {
+            return m_PointLights;
+        }
+
         const PointLight* GetPointLights() const
         {
             return m_PointLights;
         }
 
+        DirectionalLight* GetDirectionalLights()
+        {
+            return m_DirectionalLights;
+        }
+
         const DirectionalLight* GetDirectionalLights() const
         {
             return m_DirectionalLights;
+        }
+
+        SpotLight* GetSpotLights()
+        {
+            return m_SpotLights;
         }
 
         const SpotLight* GetSpotLights() const

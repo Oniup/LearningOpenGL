@@ -78,8 +78,8 @@ namespace Cm
 
     void Texture::Bind(unsigned int index)
     {
-        glBindTexture(GL_TEXTURE_2D, m_GpuId);
         glActiveTexture(GL_TEXTURE0 + index);
+        glBindTexture(GL_TEXTURE_2D, m_GpuId);
     }
 
     void Texture::Destroy()

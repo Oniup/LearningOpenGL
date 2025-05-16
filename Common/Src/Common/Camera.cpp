@@ -31,35 +31,35 @@ namespace Cm
         ImGuiEnabled = context.IsImGuiEnabled();
     }
 
-    void FirstPersonCamera::ProcessMovement(const Window& window, float deltaTime)
+    void FirstPersonCamera::ProcessMovement(const Context& context)
     {
         glm::vec3 moveDirection(0.0f);
         float moveSpeed = MoveSpeed;
 
-        if (glfwGetKey(window.GetInternalWindow(), GLFW_KEY_W) == GLFW_PRESS)
+        if (glfwGetKey(context.GetWindow().GetInternalWindow(), GLFW_KEY_W) == GLFW_PRESS)
             moveDirection += -Forward;
-        if (glfwGetKey(window.GetInternalWindow(), GLFW_KEY_S) == GLFW_PRESS)
+        if (glfwGetKey(context.GetWindow().GetInternalWindow(), GLFW_KEY_S) == GLFW_PRESS)
             moveDirection += Forward;
-        if (glfwGetKey(window.GetInternalWindow(), GLFW_KEY_A) == GLFW_PRESS)
+        if (glfwGetKey(context.GetWindow().GetInternalWindow(), GLFW_KEY_A) == GLFW_PRESS)
             moveDirection += glm::cross(Forward, Up);
-        if (glfwGetKey(window.GetInternalWindow(), GLFW_KEY_D) == GLFW_PRESS)
+        if (glfwGetKey(context.GetWindow().GetInternalWindow(), GLFW_KEY_D) == GLFW_PRESS)
             moveDirection += -glm::cross(Forward, Up);
-        if (glfwGetKey(window.GetInternalWindow(), GLFW_KEY_E) == GLFW_PRESS)
+        if (glfwGetKey(context.GetWindow().GetInternalWindow(), GLFW_KEY_E) == GLFW_PRESS)
             moveDirection += Up;
-        if (glfwGetKey(window.GetInternalWindow(), GLFW_KEY_Q) == GLFW_PRESS)
+        if (glfwGetKey(context.GetWindow().GetInternalWindow(), GLFW_KEY_Q) == GLFW_PRESS)
             moveDirection += -Up;
-        if (glfwGetKey(window.GetInternalWindow(), GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        if (glfwGetKey(context.GetWindow().GetInternalWindow(), GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
             moveSpeed *= 2;
 
         if (glm::dot(moveDirection, moveDirection) != 0)
-            Position += glm::normalize(moveDirection) * moveSpeed * deltaTime;
+            Position += glm::normalize(moveDirection) * moveSpeed * context.GetDeltaTime();
 
         static bool last = true;
-        bool switchCanRotate = glfwGetMouseButton(window.GetInternalWindow(), GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
+        bool switchCanRotate = glfwGetMouseButton(context.GetWindow().GetInternalWindow(), GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
         if (last != switchCanRotate)
         {
             CanRotate = !CanRotate;
-            glfwSetInputMode(window.GetInternalWindow(), GLFW_CURSOR, CanRotate ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+            glfwSetInputMode(context.GetWindow().GetInternalWindow(), GLFW_CURSOR, CanRotate ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
         }
         last = switchCanRotate;
     }

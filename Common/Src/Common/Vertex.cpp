@@ -38,7 +38,7 @@ namespace Cm
         return transforms;
     }
 
-    glm::mat4 Transform::GetModel() const
+    glm::mat4 Transform::GetModelMatrix() const
     {
         glm::vec3 eulerAngles = glm::radians(Rotation);
         // Create quaternions from euler angles

@@ -119,7 +119,7 @@ int main(int argc, char** argv)
             ImGui::End();
         }
 
-        camera.ProcessMovement(context.GetWindow(), context.GetDeltaTime());
+        camera.ProcessMovement(context);
         camera.ProcessMouseMovement();
 
         // Set the view matrix every frame
@@ -155,14 +155,14 @@ int main(int argc, char** argv)
         for (const Cm::Transform& transform : cubeTransforms)
         {
             cubeShader.UniformF3("u_ViewPosition", camera.Position);
-            cubeShader.UniformMat4("u_Model", transform.GetModel());
+            cubeShader.UniformMat4("u_Model", transform.GetModelMatrix());
             cubeVertexBuffer.Draw(Cm::DrawMode::Triangles);
         }
 
         lightShader.Bind();
         for (const Light& light : lights)
         {
-            lightShader.UniformMat4("u_Model", light.Transform.GetModel());
+            lightShader.UniformMat4("u_Model", light.Transform.GetModelMatrix());
             lightShader.UniformF3("u_LightColor", light.Color);
             cubeVertexBuffer.Draw(Cm::DrawMode::Triangles);
         }

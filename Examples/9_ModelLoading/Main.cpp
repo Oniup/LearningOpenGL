@@ -34,45 +34,45 @@ int main(int argc, char** argv)
     Cm::Transform transform;
     transform.Position = glm::vec3(0.0f);
 
+    int lastWinSize = 0;
     while (context.BeginFrame())
     {
+        int winSize = context.GetWindow().GetWidth() + context.GetWindow().GetHeight();
+        float lastFov = camera.Fov;
         if (ImGui::Begin("Options"))
         {
             ImGui::ColorEdit3("Clear Color", &context.GetClearColor()[0]);
             if (ImGui::CollapsingHeader("Camera"))
             {
-                float lastFov = camera.Fov;
-                ImGui::DragFloat("FOV", &camera.Fov);
-                ImGui::DragFloat("Mouse Sensitivity", &camera.MouseSensitivity, 0.01f);
-
-                // camera.Fov = std::clamp(camera.Fov, 5.0f, 90.0f);
-                camera.MouseSensitivity = std::clamp(camera.MouseSensitivity, 0.0f, 2.0f);
-                if (lastFov != camera.Fov)
-                {
-                    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-                    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &camera.GetProjectionMatrix(context)[0][0]);
-                    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-                }
+                ImGui::DragFloat("FOV", &camera.Fov, 5.0f, 90.0f);
+                ImGui::DragFloat("Mouse Sensitivity", &camera.MouseSensitivity, 0.01f, 0.1, 2.0f);
             }
             if (lights.ImGuiEdit())
                 lights.UpdateGpuBuffer();
             ImGui::End();
         }
 
+        if (lastFov != camera.Fov || lastWinSize != winSize)
+        {
+            glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &camera.GetProjectionMatrix(context)[0][0]);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
         glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
         glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), &camera.GetViewMatrix()[0][0]);
         glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, sizeof(glm::mat4) * 2);
         lights.Bind(1);
 
+        camera.ProcessMovement(context);
         camera.ProcessMouseMovement();
-        camera.ProcessMovement(context.GetWindow(), context.GetDeltaTime());
 
         shader.Bind();
-        shader.UniformMat4("u_Model", transform.GetModel());
+        shader.UniformMat4("u_Model", transform.GetModelMatrix());
         shader.UniformF3("u_ViewPosition", camera.Position);
         model.Draw(shader);
 
         lights.DrawLightObjects(lightShader, sphere, sphere);
+        lastWinSize = winSize;
         context.EndFrame();
     }
     return 0;

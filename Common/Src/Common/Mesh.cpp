@@ -9,6 +9,13 @@ namespace Cm
         m_Vertices.PushData(indices);
     }
 
+    Mesh::Mesh(size_t vertexCount, const Vertex* vertices, size_t indicesCount, const unsigned int* indices, const std::vector<MeshTexture>& textures)
+        : m_Textures(textures)
+    {
+        m_Vertices.PushData(vertexCount, vertices);
+        m_Vertices.PushData(indicesCount, indices);
+    }
+
     void Mesh::Draw(Shader& shader) const
     {
         // Material Setup
@@ -21,17 +28,21 @@ namespace Cm
             constexpr unsigned int uniformNameMaxSize = 128;
             char uniformName[uniformNameMaxSize];
 
+            // Support PBR in the future
             switch (texture.Type)
             {
             case aiTextureType_DIFFUSE:
+            case aiTextureType_BASE_COLOR:
                 snprintf(uniformName, uniformNameMaxSize, "u_Material.DiffuseMaps[%u]", diffuseCount);
                 ++diffuseCount;
                 break;
             case aiTextureType_SPECULAR:
+            case aiTextureType_METALNESS:
                 snprintf(uniformName, uniformNameMaxSize, "u_Material.SpecularMaps[%u]", specularCount);
                 ++specularCount;
                 break;
             case aiTextureType_EMISSIVE:
+            case aiTextureType_EMISSION_COLOR:
                 snprintf(uniformName, uniformNameMaxSize, "u_Material.EmissionMaps[%u]", emissionCount);
                 ++emissionCount;
                 break;
@@ -48,9 +59,19 @@ namespace Cm
         m_Vertices.Draw(Cm::DrawMode::Triangles);
     }
 
+    void Mesh::SetTexture(MeshTexture texture)
+    {
+        m_Textures.push_back(texture);
+    }
+
     Model::Model(const std::string_view& path)
     {
         LoadModel(path);
+    }
+
+    Model::Model(Mesh&& mesh)
+    {
+        AddMesh(std::move(mesh));
     }
 
     void Model::Draw(Shader& shader) const
@@ -59,10 +80,21 @@ namespace Cm
             mesh.Draw(shader);
     }
 
+    void Model::AddMesh(Mesh&& mesh)
+    {
+        m_Meshes.push_back(std::move(mesh));
+    }
+
+    void Model::SetAllMeshesTextures(MeshTexture texture)
+    {
+        for (Mesh& mesh : m_Meshes)
+            mesh.SetTexture(texture);
+    }
+
     void Model::LoadModel(const std::string_view& path)
     {
         Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(path.data(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_OptimizeMeshes);
+        const aiScene* scene = importer.ReadFile(path.data(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_GenUVCoords);
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
         {
             std::cerr << "Assimp Error: " << importer.GetErrorString() << "\n";

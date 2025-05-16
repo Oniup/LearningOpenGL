@@ -184,7 +184,7 @@ int main(int argc, char** argv)
             ImGui::End();
         }
 
-        camera.ProcessMovement(context.GetWindow(), context.GetDeltaTime());
+        camera.ProcessMovement(context);
         camera.ProcessMouseMovement();
 
         // Set the view matrix every frame
@@ -243,7 +243,7 @@ void Lights::RenderLights(Cm::VertexBuffer& vertexBuffer, Cm::Shader& shader)
     {
         PointLight& light = Points[i];
         transform.Position = light.Position;
-        shader.UniformMat4("u_Model", transform.GetModel());
+        shader.UniformMat4("u_Model", transform.GetModelMatrix());
         shader.UniformF3("u_LightColor", light.Color);
         vertexBuffer.Draw(Cm::DrawMode::Triangles);
     }
@@ -251,7 +251,7 @@ void Lights::RenderLights(Cm::VertexBuffer& vertexBuffer, Cm::Shader& shader)
     {
         SpotLight& light = Spots[i];
         transform.Position = light.Position;
-        shader.UniformMat4("u_Model", transform.GetModel());
+        shader.UniformMat4("u_Model", transform.GetModelMatrix());
         shader.UniformF3("u_LightColor", light.Color);
         vertexBuffer.Draw(Cm::DrawMode::Triangles);
     }
@@ -398,7 +398,7 @@ void RenderScene(const std::vector<Cube>& scene, Cm::Shader& shader, Cm::VertexB
         shader.UniformF("u_Material.Shininess", cube.Material.Shininess);
 
         shader.UniformF3("u_ViewPosition", camera.Position);
-        shader.UniformMat4("u_Model", cube.Transform.GetModel());
+        shader.UniformMat4("u_Model", cube.Transform.GetModelMatrix());
         vertexBuffer.Draw(Cm::DrawMode::Triangles);
     }
 }

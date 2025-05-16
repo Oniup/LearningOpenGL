@@ -42,7 +42,7 @@ namespace Cm
 
         FirstPersonCamera(const Context& context);
 
-        void ProcessMovement(const Window& window, float deltaTime);
+        void ProcessMovement(const Context& context);
         void ProcessMouseMovement(bool constrainPitch = true);
 
         static void MouseCallback(GLFWwindow* window, double xPos, double yPos);

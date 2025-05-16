@@ -82,3 +82,4 @@ Add(7_BasicLights_Materials)
 Add(8_BasicLights_LightCasters)
 
 Add(9_ModelLoading)
+Add(10_DepthAndStencilTesting)

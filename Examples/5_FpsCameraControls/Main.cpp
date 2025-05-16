@@ -172,7 +172,7 @@ int main(int argc, char** argv)
         for (Cm::Transform& transform : cubeTransforms)
         {
             // Model matrix
-            glm::mat4 model(transform.GetModel());
+            glm::mat4 model(transform.GetModelMatrix());
             glUniformMatrix4fv(glGetUniformLocation(shader.GetGpuId(), "u_Model"), 1, GL_FALSE, &model[0][0]);
             glDrawArrays(GL_TRIANGLES, 0, Cm::Cube::VertexCount);
         }

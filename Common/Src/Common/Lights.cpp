@@ -10,7 +10,7 @@ namespace Cm
     {
         Base = glm::vec3(1.0f);
         Specular = glm::vec3(1.0f);
-        Ambient = glm::vec3(0.04f);
+        Ambient = glm::vec3(0.09f);
         Intensity = 1.0f;
     }
 
@@ -225,14 +225,14 @@ namespace Cm
         for (unsigned int i = 0; i < m_PointLightsCount; ++i)
         {
             transform.Position = m_PointLights[i].Position;
-            shader.UniformMat4("u_Model", transform.GetModel());
+            shader.UniformMat4("u_Model", transform.GetModelMatrix());
             shader.UniformF3("u_LightBaseColor", m_PointLights[i].Color.Base);
             pointLight.Draw(shader);
         }
         for (unsigned int i = 0; i < m_SpotLightsCount; ++i)
         {
             transform.Position = m_SpotLights[i].Position;
-            shader.UniformMat4("u_Model", transform.GetModel());
+            shader.UniformMat4("u_Model", transform.GetModelMatrix());
             shader.UniformF3("u_LightBaseColor", m_SpotLights[i].Color.Base);
             spotLight.Draw(shader);
         }

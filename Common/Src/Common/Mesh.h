@@ -19,9 +19,14 @@ namespace Cm
 
     class Mesh
     {
+        friend class Model;
+
     public:
         Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<MeshTexture>& textures);
+        Mesh(size_t vertexCount, const Vertex* vertices, size_t indicesCount, const unsigned int* indices, const std::vector<MeshTexture>& textures);
         void Draw(Shader& shader) const;
+
+        void SetTexture(MeshTexture texture);
 
     private:
         std::vector<MeshTexture> m_Textures;
@@ -38,7 +43,11 @@ namespace Cm
 
     public:
         Model(const std::string_view& path);
+        Model(Mesh&& mesh);
         void Draw(Shader& shader) const;
+
+        void AddMesh(Mesh&& mesh);
+        void SetAllMeshesTextures(MeshTexture texture);
 
     private:
         void LoadModel(const std::string_view& path);

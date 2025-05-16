@@ -97,12 +97,15 @@ void main()
 {
     vec3 diffuseMap = vec3(0.0);
     vec3 specularMap = vec3(0.0);
+    vec3 emissionMap = vec3(0.0);
 
     // Get Textures
     for (uint i = 0; i < u_Material.DiffuseCount; ++i)
         diffuseMap += GetTexture(u_Material.DiffuseMaps[i]);
     for (uint i = 0; i < u_Material.SpecularCount; ++i)
         specularMap += GetTexture(u_Material.SpecularMaps[i]);
+    for (uint i = 0; i < u_Material.EmissionCount; ++i)
+        emissionMap += GetTexture(u_Material.EmissionMaps[i]);
 
     // Lighting
     vec3 viewDirection = normalize(u_ViewPosition - Vertex.Position);
@@ -110,6 +113,7 @@ void main()
     vec3 directionalLighting = DirectionalLights(diffuseMap.rgb, specularMap.rgb, viewDirection);
     vec3 spotLighting = SpotLights(diffuseMap.rgb, specularMap.rgb, viewDirection);
     FragColor = vec4(pointLighting + directionalLighting + spotLighting, 1.0);
+    FragColor += vec4(emissionMap, 1.0);
 }
 
 vec3 GetTexture(sampler2D textureSample)

@@ -37,7 +37,7 @@ namespace Cm
             return  m_ClearColor;
         }
 
-        float GetDeltaTime()
+        float GetDeltaTime() const
         {
             return m_DeltaTime;
         }

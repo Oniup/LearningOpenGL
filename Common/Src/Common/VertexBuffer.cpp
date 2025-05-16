@@ -81,21 +81,27 @@ namespace Cm
 
     void VertexBuffer::PushData(size_t vertexCount, const Vertex* vertices)
     {
-        glBindVertexArray(m_Arrays);
-        glBindBuffer(GL_ARRAY_BUFFER, m_Vertices);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexCount, vertices, m_Type == Static ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
-        if (m_Indices == std::numeric_limits<unsigned int>::max())
-            m_DataCount = vertexCount;
+        if (vertexCount)
+        {
+            glBindVertexArray(m_Arrays);
+            glBindBuffer(GL_ARRAY_BUFFER, m_Vertices);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexCount, vertices, m_Type == Static ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+            if (m_Indices == std::numeric_limits<unsigned int>::max())
+                m_DataCount = vertexCount;
+        }
     }
 
     void VertexBuffer::PushData(size_t indicesCount, const unsigned int* indicess)
     {
-        glBindVertexArray(m_Arrays);
-        if (m_Indices == std::numeric_limits<unsigned int>::max())
-            glGenBuffers(1, &m_Indices);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Indices);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indicesCount, indicess, m_Type == Static ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
-        m_DataCount = indicesCount;
+        if (indicesCount > 0)
+        {
+            glBindVertexArray(m_Arrays);
+            if (m_Indices == std::numeric_limits<unsigned int>::max())
+                glGenBuffers(1, &m_Indices);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Indices);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indicesCount, indicess, m_Type == Static ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+            m_DataCount = indicesCount;
+        }
     }
 
     void VertexBuffer::PushData(const std::vector<Vertex>& vertices)
